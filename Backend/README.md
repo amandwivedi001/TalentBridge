@@ -687,6 +687,131 @@ Now I understand that `protect` checks if the user is logged in, and `allowRoles
 
 I also understand why feature-based route files are better. Later, when I add student profile editing, resume upload, recruiter job posting, and applicant management, each feature will have its own clean place in the backend.
 
+## Phase 1 Day 7 Notes
+
+### What I Learned
+
+Today I learned that development is not only about adding new features. It is also important to test, clean, document, and push the work to GitHub.
+
+This day helped me review the full Phase 1 backend foundation before moving to the next phase.
+
+### GitHub Setup
+
+I created a GitHub repository:
+
+```txt
+https://github.com/amandwivedi001/TalentBridge
+```
+
+Then I connected my local project to GitHub and pushed the first commit.
+
+The first commit message was:
+
+```txt
+Initialize TalentBridge backend foundation
+```
+
+I also added a root `.gitignore` so important files are not pushed:
+
+```txt
+.env
+node_modules/
+Backend/src/generated/prisma/
+```
+
+### Final Testing
+
+I tested all Phase 1 APIs again in Postman.
+
+Routes tested:
+
+```txt
+GET /api/health
+POST /api/auth/signup
+POST /api/auth/login
+GET /api/auth/me
+GET /api/students/profile
+GET /api/recruiters/profile
+GET /api/wrong
+```
+
+Error cases tested:
+
+```txt
+duplicate email
+missing fields
+wrong role
+wrong password
+unknown email
+missing token
+wrong role access
+wrong route
+```
+
+### What Is Working Now
+
+The backend foundation is working with:
+
+```txt
+Express server
+clean routes
+controllers
+middleware
+global error handling
+Prisma
+Neon PostgreSQL
+signup
+login
+JWT authentication
+protected routes
+role-based access
+GitHub repository
+```
+
+### My Understanding
+
+Now I understand the full Phase 1 request flow.
+
+For signup:
+
+```txt
+request
+  -> auth route
+  -> signup controller
+  -> validation
+  -> password hashing
+  -> Prisma creates user and profile
+  -> response
+```
+
+For login:
+
+```txt
+request
+  -> auth route
+  -> login controller
+  -> bcrypt compares password
+  -> JWT token generated
+  -> response
+```
+
+For protected routes:
+
+```txt
+request with token
+  -> protect middleware
+  -> token verified
+  -> user fetched from database
+  -> role checked
+  -> controller sends response
+```
+
+### Phase 1 Completion
+
+Phase 1 is complete.
+
+The project is now ready for Phase 2, where I will start building real student profile features and prepare the backend for resume upload later.
+
 ## Run Locally
 
 Install dependencies:
@@ -711,9 +836,9 @@ http://localhost:5000/api/health
 
 Phase 1 Day 6:
 
-Phase 1 Day 7:
+Phase 2:
 
-- Test all Phase 1 APIs again.
-- Clean temporary files.
-- Check README and environment examples.
-- Prepare for Phase 2 student profile work.
+- Build student profile fields.
+- Add profile update API.
+- Add profile fetch API with complete student data.
+- Start preparing for resume upload.
