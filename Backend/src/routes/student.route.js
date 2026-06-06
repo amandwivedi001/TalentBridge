@@ -1,9 +1,18 @@
-import express from "express"
-import { protect, allowRoles } from "../middleware/auth.middleware.js";
-import { getStudentProfile } from "../controllers/student.controller.js";
+import express from "express";
+
+import {
+  getStudentProfile,
+  updateStudentProfile,
+} from "../controllers/student.controller.js";
+import { allowRoles, protect } from "../middleware/auth.middleware.js";
+import validate from "../middleware/validate.middleware.js";
+import { studentProfileSchema } from "../validators/student.validator.js";
 
 const router = express.Router();
 
-router.get("/profile", protect, allowRoles("STUDENT"), getStudentProfile);
+router
+  .route("/profile")
+  .get(protect, allowRoles("STUDENT"), getStudentProfile)
+  .put(protect, allowRoles("STUDENT"), validate(studentProfileSchema), updateStudentProfile);
 
 export default router;

@@ -812,33 +812,775 @@ Phase 1 is complete.
 
 The project is now ready for Phase 2, where I will start building real student profile features and prepare the backend for resume upload later.
 
-## Run Locally
+## Phase 2 Day 1 Notes
 
-Install dependencies:
+### What I Learned
 
-```powershell
-npm install
-```
+Today I started Phase 2.
 
-Start development server:
+Phase 2 is about building real profile features and preparing the backend for resume upload later. Day 1 of Phase 2 focused only on student and recruiter profile foundation.
 
-```powershell
-npm run dev
-```
+I learned how to update existing Prisma models, run new migrations, regenerate Prisma Client, and then use the new fields in backend APIs.
 
-Health check:
+### Student Profile Schema Update
+
+I updated the `StudentProfile` model and added these fields:
 
 ```txt
-http://localhost:5000/api/health
+phone
+college
+degree
+branch
+graduationYear
+skills
+linkedinUrl
+githubUrl
+portfolioUrl
+bio
 ```
 
-## Next Step
+Most fields are optional because a student may not complete the whole profile immediately.
 
-Phase 1 Day 6:
+For skills, I used:
 
-Phase 2:
+```prisma
+skills String[] @default([])
+```
 
-- Build student profile fields.
-- Add profile update API.
-- Add profile fetch API with complete student data.
-- Start preparing for resume upload.
+This lets the backend store skills as an array like:
+
+```json
+["JavaScript", "React", "Node.js", "PostgreSQL"]
+```
+
+### Student Profile APIs
+
+I improved the student profile route.
+
+Student routes now include:
+
+```txt
+GET /api/students/profile
+PUT /api/students/profile
+```
+
+`GET /api/students/profile` fetches the logged-in student's full profile.
+
+`PUT /api/students/profile` updates the logged-in student's profile.
+
+Both routes are protected with:
+
+```txt
+protect
+allowRoles("STUDENT")
+```
+
+### Prisma Client Lesson
+
+After changing the schema and running migration, I got an error like:
+
+```txt
+Unknown argument `phone`
+```
+
+I learned that this happens when Prisma Client is still using the old generated model.
+
+The fix was:
+
+```powershell
+npx.cmd prisma generate
+```
+
+Then I restarted the backend server and the update worked.
+
+### Recruiter Profile Schema Update
+
+I updated the `RecruiterProfile` model and added these fields:
+
+```txt
+companyName
+companyWebsite
+companyLocation
+companyDescription
+designation
+```
+
+These fields will be useful later when recruiters create jobs and students view company details.
+
+### Recruiter Profile APIs
+
+Recruiter routes now include:
+
+```txt
+GET /api/recruiters/profile
+PUT /api/recruiters/profile
+```
+
+`GET /api/recruiters/profile` fetches the logged-in recruiter's full profile.
+
+`PUT /api/recruiters/profile` updates the logged-in recruiter's company/profile details.
+
+Both routes are protected with:
+
+```txt
+protect
+allowRoles("RECRUITER")
+```
+
+### Neon Connection Lesson
+
+While running Prisma commands, I got a database connection error:
+
+```txt
+P1001: Can't reach database server
+```
+
+I learned that Prisma CLI commands can sometimes work better with the direct Neon connection string, while the app can use the pooled connection string.
+
+For now, I know this rule:
+
+```txt
+Direct connection: useful for Prisma migrations
+Pooled connection: useful for normal app runtime
+```
+
+### What I Tested
+
+Student tests:
+
+```txt
+student can fetch profile
+student can update profile
+recruiter cannot update student profile
+request without token is blocked
+student profile data is saved in Neon
+```
+
+Recruiter tests:
+
+```txt
+recruiter can fetch profile
+recruiter can update profile
+student cannot update recruiter profile
+request without token is blocked
+recruiter profile data is saved in Neon
+```
+
+### What Is Completed In Phase 2 Day 1
+
+Completed today:
+
+```txt
+StudentProfile schema updated
+student profile migration completed
+student profile GET/PUT APIs completed
+student profile tests completed
+RecruiterProfile schema updated
+recruiter profile migration completed
+recruiter profile GET/PUT APIs completed
+recruiter profile tests completed
+```
+
+
+## Phase 2 Day 2 Notes
+
+### What I Learned
+
+Today I learned how request validation works in a production backend.
+
+Before today, the profile update APIs accepted any data sent by the client. This meant invalid values such as incorrect phone numbers, malformed URLs, invalid graduation years, or unexpected fields could reach the controller and database.
+
+I learned that validation should happen before business logic. A request should first be authenticated, then authorized, then validated, and only after that should the controller update the database.
+
+I also learned how schema-based validation makes APIs safer, easier to maintain, and more predictable.
+
+### Why Validation Is Important
+
+Without validation, a client could send data like:
+
+```json
+{
+  "phone": "123",
+  "graduationYear": "hello",
+  "githubUrl": "not-a-url"
+}
+```
+
+and the backend would have to deal with invalid values later.
+
+With validation, the request is rejected immediately with a clear error message before reaching the controller.
+
+The request flow now looks like:
+
+```txt
+Request
+  -> protect middleware
+  -> allowRoles middleware
+  -> validation middleware
+  -> controller
+  -> database
+```
+
+### Zod Introduction
+
+Today I learned Zod, a schema validation library for JavaScript and TypeScript.
+
+Zod allows me to define the expected shape of request data and automatically validate incoming requests.
+
+I used:
+
+```js
+schema.safeParse(req.body)
+```
+
+instead of manually checking every field.
+
+I also learned:
+
+```js
+z.coerce.number()
+```
+
+which automatically converts values like:
+
+```txt
+"2027"
+```
+
+into:
+
+```txt
+2027
+```
+
+before validation.
+
+### Validation Middleware
+
+I created:
+
+```txt
+src/middleware/validate.middleware.js
+```
+
+This middleware receives a Zod schema and validates the request body.
+
+If validation fails:
+
+```txt
+400 Bad Request
+```
+
+is returned with detailed field errors.
+
+If validation succeeds:
+
+```txt
+req.validatedData
+```
+
+contains the cleaned and validated data.
+
+This means controllers can trust the incoming data instead of validating again.
+
+### Student Profile Validator
+
+I created:
+
+```txt
+src/validators/student.validator.js
+```
+
+The student profile validator checks:
+
+```txt
+phone
+college
+degree
+branch
+graduationYear
+skills
+linkedinUrl
+githubUrl
+portfolioUrl
+bio
+```
+
+Validation rules include:
+
+* Valid Indian phone number format
+* Graduation year range
+* Valid URLs
+* Maximum bio length
+* Skills must be an array of non-empty strings
+* Unknown fields are rejected
+
+I also used:
+
+```js
+.strict()
+```
+
+to prevent unexpected properties from being accepted.
+
+### Recruiter Profile Validator
+
+I created:
+
+```txt
+src/validators/recruiter.validator.js
+```
+
+The recruiter profile validator checks:
+
+```txt
+companyName
+companyWebsite
+companyLocation
+companyDescription
+designation
+```
+
+Validation rules include:
+
+* Valid company website URL
+* Minimum and maximum lengths
+* Trimming whitespace
+* Rejecting unexpected fields
+
+### Controller Improvement
+
+I updated the controllers to use:
+
+```js
+req.validatedData
+```
+
+instead of:
+
+```js
+req.body
+```
+
+This ensures only validated data reaches the database.
+
+I learned that validation middleware should be the single source of truth for request validation.
+
+### Route Updates
+
+I updated:
+
+```txt
+src/routes/student.route.js
+src/routes/recruiter.route.js
+```
+
+The update routes now use validation middleware.
+
+Student flow:
+
+```txt
+PUT /api/students/profile
+  -> protect
+  -> allowRoles("STUDENT")
+  -> validate(studentProfileSchema)
+  -> updateStudentProfile
+```
+
+Recruiter flow:
+
+```txt
+PUT /api/recruiters/profile
+  -> protect
+  -> allowRoles("RECRUITER")
+  -> validate(recruiterProfileSchema)
+  -> updateRecruiterProfile
+```
+
+### What I Tested
+
+Student validation tests:
+
+```txt
+Valid profile update works
+Invalid phone number is rejected
+Invalid GitHub URL is rejected
+Invalid LinkedIn URL is rejected
+Invalid graduation year is rejected
+Unknown fields are rejected
+Missing token is rejected
+Recruiter cannot access student routes
+```
+
+Recruiter validation tests:
+
+```txt
+Valid profile update works
+Invalid company website is rejected
+Invalid company name length is rejected
+Unknown fields are rejected
+Missing token is rejected
+Student cannot access recruiter routes
+```
+
+### My Understanding
+
+Today I understood that validation is different from business logic.
+
+Validation answers:
+
+```txt
+Is the request data valid?
+```
+
+Controllers answer:
+
+```txt
+What should the application do with valid data?
+```
+
+By separating these responsibilities, the backend becomes easier to maintain, easier to test, and closer to production-level architecture.
+
+### What Is Completed In Phase 2 Day 2
+
+Completed today:
+
+```txt
+Zod installed
+Validation middleware created
+Student profile validator created
+Recruiter profile validator created
+Student profile route validation added
+Recruiter profile route validation added
+Controllers updated to use validated data
+Validation tests completed
+```
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Resume Upload Foundation
+Cloudinary integration
+File upload validation
+Resume model design
+Resume upload API
+```
+
+This will prepare the platform for resume parsing and AI analysis in later phases.
+
+## Phase 2 Day 3 Notes
+
+### What I Learned
+
+Today I started the Resume module foundation for TalentBridge.
+
+Before implementing file uploads, I learned the importance of designing the database schema, API structure, and module architecture first. Instead of directly integrating file uploads, I focused on preparing the backend for future resume management features.
+
+I learned that good backend development starts with designing relationships and responsibilities before writing feature-specific code.
+
+---
+
+### Resume Module Planning
+
+The TalentBridge platform requires students to upload resumes that will later be used for:
+
+```txt
+Resume Upload
+↓
+Resume Parsing
+↓
+AI Resume Analysis
+↓
+Job Matching
+↓
+Recruiter Shortlisting
+```
+
+Because many future features depend on resumes, I first designed the Resume model and its relationship with StudentProfile.
+
+---
+
+### Resume Model Design
+
+I created a new Prisma model:
+
+```prisma
+model Resume {
+  id String @id @default(cuid())
+
+  studentId String @unique
+
+  fileName String
+
+  fileUrl String
+
+  publicId String
+
+  uploadedAt DateTime @default(now())
+
+  student StudentProfile @relation(
+    fields: [studentId],
+    references: [id],
+    onDelete: Cascade
+  )
+}
+```
+
+### Why These Fields Exist
+
+#### studentId
+
+```txt
+Links a resume to a specific student profile.
+```
+
+I used:
+
+```prisma
+@unique
+```
+
+because the MVP allows only one active resume per student.
+
+---
+
+#### fileName
+
+Stores the original resume file name.
+
+Example:
+
+```txt
+Aman_Dwivedi_Resume.pdf
+```
+
+---
+
+#### fileUrl
+
+Stores the cloud URL of the uploaded resume.
+
+This will later be used to:
+
+```txt
+View Resume
+Download Resume
+Resume Analysis
+```
+
+---
+
+#### publicId
+
+Stores Cloudinary's unique file identifier.
+
+This will allow future features such as:
+
+```txt
+Resume Replacement
+Resume Deletion
+```
+
+without leaving unused files in cloud storage.
+
+---
+
+#### uploadedAt
+
+Stores the exact upload timestamp.
+
+This will help display:
+
+```txt
+Last Resume Update
+```
+
+inside the student dashboard.
+
+---
+
+### StudentProfile Relationship Update
+
+I added:
+
+```prisma
+resume Resume?
+```
+
+inside the StudentProfile model.
+
+This creates a one-to-one relationship:
+
+```txt
+StudentProfile
+      ↕
+     Resume
+```
+
+This means every student can have one active resume.
+
+---
+
+### Why I Chose One Resume Per Student
+
+I considered storing multiple resume versions but decided against it for the MVP.
+
+Reason:
+
+```txt
+TalentBridge is a recruitment platform,
+not a resume management platform.
+```
+
+Recruiters only need the student's latest resume.
+
+Keeping one active resume makes:
+
+```txt
+Database simpler
+APIs simpler
+UI simpler
+Testing easier
+```
+
+while still supporting all required features.
+
+---
+
+### Prisma Migration
+
+After updating the schema, I ran Prisma validation and migration commands.
+
+I learned that Prisma schema errors are often caused by:
+
+```txt
+Incorrect relation syntax
+Missing colons
+Missing parentheses
+Unsaved schema changes
+```
+
+I fixed relation syntax issues and successfully validated the schema.
+
+The Resume table was successfully created in the Neon PostgreSQL database.
+
+---
+
+### Resume Module Structure
+
+I created the Resume module foundation.
+
+New files:
+
+```txt
+src/controllers/resume.controller.js
+src/routes/resume.route.js
+```
+
+This follows the same modular architecture used across the project.
+
+---
+
+### Resume APIs
+
+I created the initial routes:
+
+```txt
+GET /api/resumes/me
+POST /api/resumes/upload
+```
+
+At this stage, the APIs return placeholder responses because the upload infrastructure has not been implemented yet.
+
+---
+
+### Route Protection
+
+Both routes are protected using:
+
+```txt
+protect
+allowRoles("STUDENT")
+```
+
+This ensures:
+
+```txt
+Only authenticated students can access resume endpoints.
+Recruiters cannot upload resumes.
+Unauthenticated users are blocked.
+```
+
+---
+
+### What I Tested
+
+Resume route tests:
+
+```txt
+Student can access GET /api/resumes/me
+Student can access POST /api/resumes/upload
+Recruiter is blocked from resume routes
+Requests without token are rejected
+Resume routes are registered correctly
+```
+
+---
+
+### My Understanding
+
+Today I learned that backend development should be done in layers.
+
+Instead of immediately implementing file uploads, I first completed:
+
+```txt
+Database Design
+↓
+Module Design
+↓
+API Design
+↓
+Route Protection
+↓
+Testing
+```
+
+This approach makes future features easier to build and maintain.
+
+---
+
+### What Is Completed In Phase 2 Day 3
+
+Completed today:
+
+```txt
+Resume Prisma model created
+StudentProfile ↔ Resume relationship added
+Resume database migration completed
+Resume table created in Neon
+Resume controller created
+Resume routes created
+Resume route protection added
+Resume module registered
+Resume endpoint testing completed
+```
+
+---
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Phase 2 Day 4
+
+Multer setup
+Multipart form-data understanding
+File upload validation
+PDF-only upload restriction
+Resume upload infrastructure
+```
+
+This will prepare the backend for Cloudinary integration and resume storage in later phases.
