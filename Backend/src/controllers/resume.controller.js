@@ -3,6 +3,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import prisma from "../config/prisma.js";
 import { deleteResumeFromCloudinary, uploadResumeToCloudinary } from "../services/cloudinary.service.js";
+import { extractTextFromPdf } from "../services/pdf.service.js";
 
 export const getMyResume = asyncHandler(async (req, res) => {
 
@@ -33,7 +34,7 @@ export const uploadResume = asyncHandler(async (req, res) => {
     }
 
     const studentId = req.user.studentProfile.id
-    
+
     const existingResume = await prisma.resume.findUnique({
         where: {
             studentId
@@ -84,4 +85,44 @@ export const uploadResume = asyncHandler(async (req, res) => {
             "Resume Uploaded successfully"
         )
     )
+})
+
+export const extractResumeText = asyncHandler(async (req, res) => {
+    const studentId = req.user.studentProfile.id;
+
+    const resume = await prisma.resume.findUnique({
+        where: {
+            studentId,
+        },
+    });
+
+    if (!resume) {
+        throw new ApiError(404, "Resume not found")
+    }
+
+    const response = await fetch(resume.fileUrl);
+
+    if (!response.ok) {
+        throw new ApiError(500, "Failed to download resume")
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+
+    const buffer = Buffer.from(arrayBuffer);
+
+    const text = await extractTextFromPdf(buffer);
+
+    const data = {
+        fileName: resume.fileName,
+        extractedText: text.slice(0, 2000),
+    };
+
+    res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                data,
+                "Text from resume extracted successfully"
+            )
+        )
 })

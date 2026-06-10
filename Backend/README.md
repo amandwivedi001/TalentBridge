@@ -2339,3 +2339,373 @@ Prepare Data For AI Analysis
 ```
 
 This will allow TalentBridge to read resume content and prepare it for ATS scoring, skill analysis, and AI-powered candidate matching.
+
+## Phase 2 Day 6 Notes
+
+### What I Learned
+
+Today I completed the resume text extraction pipeline for TalentBridge.
+
+Until now, the platform could:
+
+```txt
+Student Upload Resume
+        ↓
+Cloudinary
+        ↓
+PostgreSQL
+```
+
+The resume file was stored successfully, but the system could not understand the content inside the PDF.
+
+Today I learned how to extract raw text from PDF resumes so that the content can later be analyzed by AI.
+
+The new flow is:
+
+```txt
+Resume PDF
+      ↓
+Cloudinary URL
+      ↓
+Download PDF
+      ↓
+Convert to Buffer
+      ↓
+PDF Parser
+      ↓
+Extract Text
+```
+
+This is the foundation for ATS scoring, skill analysis, candidate matching, and mock interview generation.
+
+---
+
+### Why PDF Text Extraction Is Required
+
+AI models cannot directly understand a stored PDF file.
+
+Before sending resume data to Gemini, the PDF must be converted into plain text.
+
+Example:
+
+```txt
+resume.pdf
+```
+
+becomes:
+
+```txt
+AMAN DWIVEDI
+
+Education
+B.E Information Technology
+
+Skills
+React
+Node.js
+PostgreSQL
+
+Projects
+TalentBridge
+Chat Application
+```
+
+This extracted text is what will later be analyzed by AI.
+
+---
+
+### PDF Parsing Library
+
+I installed:
+
+```bash
+npm install pdf-parse
+```
+
+and learned how PDF parsing libraries convert binary PDF data into readable text.
+
+The library reads:
+
+```txt
+PDF Buffer
+```
+
+and returns:
+
+```txt
+Extracted Resume Text
+```
+
+which can be processed further.
+
+---
+
+### PDF Service Layer
+
+I created:
+
+```txt
+src/services/pdf.service.js
+```
+
+This service follows the single responsibility principle.
+
+Its only responsibility is:
+
+```txt
+Buffer
+ ↓
+Text
+```
+
+It does not know anything about:
+
+```txt
+Cloudinary
+Database
+Authentication
+Routes
+```
+
+This keeps the architecture modular and maintainable.
+
+---
+
+### PDF Parsing Logic
+
+I implemented:
+
+```js
+extractTextFromPdf(buffer)
+```
+
+Workflow:
+
+```txt
+PDF Buffer
+      ↓
+PDF Parser
+      ↓
+Extract Text
+      ↓
+Return Text
+```
+
+The service validates that a buffer exists before processing the PDF.
+
+---
+
+### Understanding Buffers
+
+Today I learned that uploaded files are represented as:
+
+```txt
+Buffer
+```
+
+inside Node.js.
+
+A buffer is binary data stored in memory.
+
+Flow:
+
+```txt
+Cloudinary PDF
+      ↓
+Fetch File
+      ↓
+ArrayBuffer
+      ↓
+Node Buffer
+      ↓
+PDF Parser
+```
+
+This allowed the resume file to be processed without saving it locally.
+
+---
+
+### Resume Extraction Endpoint
+
+I created a temporary endpoint:
+
+```txt
+GET /api/resumes/extract
+```
+
+This endpoint performs the following steps:
+
+```txt
+Find Resume Record
+      ↓
+Get Cloudinary URL
+      ↓
+Download Resume PDF
+      ↓
+Convert PDF To Buffer
+      ↓
+Extract Text
+      ↓
+Return Extracted Text
+```
+
+This endpoint is used only for testing and validating the extraction pipeline.
+
+---
+
+### Fetch API in Node.js
+
+I learned that Node.js v22 includes a built-in:
+
+```js
+fetch()
+```
+
+API.
+
+This allowed me to download the PDF directly from Cloudinary without installing additional HTTP libraries.
+
+Flow:
+
+```txt
+Cloudinary URL
+      ↓
+fetch()
+      ↓
+ArrayBuffer
+      ↓
+Buffer
+```
+
+This simplified the implementation.
+
+---
+
+### Service Architecture Lesson
+
+By the end of today, the resume processing pipeline became:
+
+```txt
+Upload Middleware
+      ↓
+Cloudinary Service
+      ↓
+PDF Service
+      ↓
+Controller
+```
+
+Each layer has one responsibility:
+
+```txt
+Upload Middleware → File Handling
+Cloudinary Service → Storage
+PDF Service → Text Extraction
+Controller → Business Logic
+```
+
+This separation makes the backend easier to maintain and extend.
+
+---
+
+### What I Tested
+
+Resume extraction tests:
+
+```txt
+Resume record found successfully
+PDF downloaded successfully from Cloudinary
+ArrayBuffer conversion works
+Buffer conversion works
+PDF parser extracts text correctly
+Extracted text returned successfully
+Protected route works
+Recruiter access blocked
+Unauthenticated requests blocked
+```
+
+All tests passed successfully.
+
+---
+
+### My Understanding
+
+Today I learned several important backend concepts:
+
+```txt
+PDF Parsing
+Text Extraction
+ArrayBuffer
+Node Buffer
+Fetch API
+Service Layer Design
+Resume Processing Pipeline
+Binary File Processing
+```
+
+I also learned that before any AI integration can happen, data must first be transformed into a format that the AI can understand.
+
+For resumes, that format is plain text.
+
+---
+
+### What Is Completed In Phase 2 Day 6
+
+Completed today:
+
+```txt
+pdf-parse installed
+PDF service created
+Resume text extraction implemented
+Cloudinary PDF download implemented
+Buffer conversion implemented
+Resume extraction endpoint created
+Resume extraction testing completed
+Resume text successfully returned
+AI pipeline foundation completed
+```
+
+---
+
+### Current Resume Processing Flow
+
+Current architecture:
+
+```txt
+Student Upload Resume
+        ↓
+Multer
+        ↓
+Cloudinary
+        ↓
+PostgreSQL
+        ↓
+Resume Retrieval
+        ↓
+PDF Download
+        ↓
+Text Extraction
+```
+
+The platform can now understand the contents of uploaded resumes.
+
+---
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Phase 2 Day 7
+
+Gemini Integration
+Resume Analysis
+ATS Score Generation
+Skills Detection
+Missing Skills Analysis
+Strengths & Weaknesses Detection
+Improvement Suggestions
+```
+
+This will be the first AI-powered feature of TalentBridge and the beginning of the complete resume analysis system.
+

@@ -1,4 +1,4 @@
-import { getMyResume, uploadResume } from "../controllers/resume.controller.js";
+import { getMyResume, uploadResume , extractResumeText} from "../controllers/resume.controller.js";
 import {protect, allowRoles } from "../middleware/auth.middleware.js";
 import express from "express"
 import { upload } from "../middleware/upload.middleware.js";
@@ -14,6 +14,8 @@ router.post(
   upload.single("resume"),
   uploadResume
 );
+
+router.get("/extract", protect, allowRoles("STUDENT"), extractResumeText);
 
 
 export default router;
