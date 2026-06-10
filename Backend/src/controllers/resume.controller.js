@@ -1,12 +1,29 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import prisma from "../config/prisma.js";
+import { deleteResumeFromCloudinary, uploadResumeToCloudinary } from "../services/cloudinary.service.js";
 
 export const getMyResume = asyncHandler(async (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: "Resume module ready"
-    });
+
+    const studentId = req.user.studentProfile.id;
+
+    const existingResume = await prisma.resume.findUnique({
+        where: {
+            studentId
+        },
+    })
+
+    if (!existingResume) {
+        throw new ApiError(404, "Resume Not Found")
+    }
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            existingResume,
+            "Resume Fetched Successfully"
+        ));
 })
 
 export const uploadResume = asyncHandler(async (req, res) => {
@@ -15,17 +32,55 @@ export const uploadResume = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Resume file is required");
     }
 
-    const data = {
-        fileName: req.file.originalname,
-        size: req.file.size,
-        mimeType: req.file.mimetype,
-        bufferSize: req.file.buffer.length
+    const studentId = req.user.studentProfile.id
+    
+    const existingResume = await prisma.resume.findUnique({
+        where: {
+            studentId
+        },
+    })
+
+    if (existingResume) {
+        await deleteResumeFromCloudinary(
+            existingResume.publicId
+        );
     }
+
+    const uploadedResume = await uploadResumeToCloudinary(
+        req.file.buffer
+    );
+
+    if (!uploadedResume?.secure_url ||
+        !uploadedResume?.public_id) {
+        throw new ApiError(
+            500,
+            "Failed to upload resume"
+        )
+    }
+
+    const resume = await prisma.resume.upsert({
+        where: {
+            studentId
+        },
+
+        update: {
+            fileName: req.file.originalname,
+            fileUrl: uploadedResume.secure_url,
+            publicId: uploadedResume.public_id
+        },
+
+        create: {
+            studentId,
+            fileName: req.file.originalname,
+            fileUrl: uploadedResume.secure_url,
+            publicId: uploadedResume.public_id
+        }
+    })
 
     res.status(200).json(
         new ApiResponse(
             200,
-            data,
+            resume,
             "Resume Uploaded successfully"
         )
     )

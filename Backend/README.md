@@ -1917,3 +1917,425 @@ Return uploaded resume details
 ```
 
 This will complete the first version of the resume storage system and prepare the platform for resume parsing and AI analysis.
+
+## Phase 2 Day 5 Notes
+
+### What I Learned
+
+Today I completed the first fully functional resume storage system in TalentBridge.
+
+Before today, the backend could receive PDF files using Multer, but uploaded files were not stored permanently. If the server restarted, the uploaded file would be lost.
+
+Today I learned how cloud storage works and how to integrate Cloudinary into a Node.js backend.
+
+The complete resume upload flow now looks like:
+
+```txt
+Student Uploads Resume
+        ↓
+Multer
+        ↓
+Memory Buffer
+        ↓
+Cloudinary
+        ↓
+Resume URL Generated
+        ↓
+PostgreSQL Resume Record
+        ↓
+Success Response
+```
+
+This is the first complete end-to-end feature in the project.
+
+---
+
+### Why Cloudinary Is Needed
+
+Multer only processes uploaded files.
+
+Using:
+
+```js
+multer.memoryStorage()
+```
+
+stores files temporarily in memory.
+
+This means:
+
+```txt
+Server Restart
+      ↓
+File Lost
+```
+
+To make resume uploads permanent, I integrated Cloudinary.
+
+Cloudinary provides:
+
+```txt
+Cloud Storage
+Public File URLs
+File Management
+File Deletion
+```
+
+which makes uploaded resumes accessible even after server restarts.
+
+---
+
+### Cloudinary Configuration
+
+I created:
+
+```txt
+src/config/cloudinary.js
+```
+
+This file is responsible only for Cloudinary configuration.
+
+Environment variables used:
+
+```env
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+```
+
+This keeps sensitive credentials outside the source code.
+
+---
+
+### Service Layer Introduction
+
+Today I learned an important backend design principle:
+
+```txt
+Controllers should not directly communicate with third-party services.
+```
+
+Instead, I created:
+
+```txt
+src/services/cloudinary.service.js
+```
+
+This service layer handles:
+
+```txt
+Resume Upload
+Resume Deletion
+```
+
+while controllers remain focused on business logic.
+
+---
+
+### Buffer to Cloudinary Upload
+
+Because Multer uses:
+
+```js
+memoryStorage()
+```
+
+uploaded files are available as:
+
+```js
+req.file.buffer
+```
+
+Cloudinary upload APIs expect a file stream.
+
+To solve this, I used:
+
+```js
+streamifier
+```
+
+Flow:
+
+```txt
+Buffer
+  ↓
+Stream
+  ↓
+Cloudinary Upload Stream
+```
+
+This allowed PDF files to be uploaded directly from memory without creating temporary files on disk.
+
+---
+
+### Cloudinary Upload Service
+
+I created:
+
+```txt
+uploadResumeToCloudinary()
+```
+
+This function:
+
+```txt
+Receives file buffer
+Uploads PDF to Cloudinary
+Returns secure URL
+Returns public ID
+```
+
+Important fields returned:
+
+```txt
+secure_url
+public_id
+```
+
+These values are later stored in PostgreSQL.
+
+---
+
+### Cloudinary Delete Service
+
+I also created:
+
+```txt
+deleteResumeFromCloudinary()
+```
+
+This function removes previously uploaded resumes from Cloudinary.
+
+Reason:
+
+```txt
+Student uploads Resume V1
+Student uploads Resume V2
+```
+
+Without deletion:
+
+```txt
+Resume V1 remains stored forever
+```
+
+which wastes storage.
+
+Now the system automatically deletes the old resume before saving the new one.
+
+---
+
+### Resume Upload Logic
+
+I completed the upload controller.
+
+Current workflow:
+
+```txt
+Check uploaded file
+      ↓
+Get student profile
+      ↓
+Check existing resume
+      ↓
+Delete old Cloudinary file
+      ↓
+Upload new resume
+      ↓
+Create or update Resume record
+      ↓
+Return response
+```
+
+This ensures that each student always has one active resume.
+
+---
+
+### Prisma Upsert
+
+Today I learned how to use:
+
+```js
+prisma.resume.upsert()
+```
+
+Instead of writing:
+
+```txt
+Find Resume
+↓
+If Exists → Update
+Else → Create
+```
+
+I used:
+
+```txt
+Upsert
+```
+
+which automatically:
+
+```txt
+Creates record if it doesn't exist
+Updates record if it already exists
+```
+
+This makes the code cleaner and easier to maintain.
+
+---
+
+### Foreign Key Debugging Lesson
+
+Today I encountered an important database bug.
+
+Error:
+
+```txt
+Foreign key constraint failed
+```
+
+At first, the Resume upload was failing even though the Cloudinary upload worked correctly.
+
+After debugging, I learned the difference between:
+
+```txt
+User.id
+```
+
+and
+
+```txt
+StudentProfile.id
+```
+
+Example:
+
+```txt
+User.id
+cmq0dfjmc0000ygyzj02500s6
+
+StudentProfile.id
+cmq0dfjs00001ygyzmqsxdamf
+```
+
+The Resume model references:
+
+```txt
+StudentProfile.id
+```
+
+not:
+
+```txt
+User.id
+```
+
+I was accidentally using the wrong identifier.
+
+After switching to:
+
+```js
+req.user.studentProfile.id
+```
+
+the foreign key error was resolved.
+
+This was an important lesson about database relationships and foreign keys.
+
+---
+
+### Resume Retrieval
+
+I completed:
+
+```txt
+GET /api/resumes/me
+```
+
+This endpoint:
+
+```txt
+Finds the student's uploaded resume
+Returns resume metadata
+Returns Cloudinary URL
+```
+
+and throws an error if no resume exists.
+
+---
+
+### What I Tested
+
+Resume upload tests:
+
+```txt
+First resume upload succeeds
+Resume stored in Cloudinary
+Resume record stored in PostgreSQL
+Resume retrieval succeeds
+Second upload updates existing record
+Old Cloudinary file is deleted
+Resume URL updates correctly
+Recruiter cannot access resume routes
+Requests without token are rejected
+```
+
+All tests passed successfully.
+
+---
+
+### My Understanding
+
+Today I learned several important backend concepts:
+
+```txt
+Cloud Storage
+Cloudinary Configuration
+Service Layer Architecture
+Buffer Uploads
+Streamifier
+Cloudinary Upload Streams
+File Replacement
+Prisma Upsert
+Foreign Keys
+Database Relationships
+```
+
+I also learned how to debug relationship errors by tracing foreign key references and understanding how different database IDs relate to each other.
+
+---
+
+### What Is Completed In Phase 2 Day 5
+
+Completed today:
+
+```txt
+Cloudinary configured
+Cloudinary service layer created
+Resume upload to Cloudinary implemented
+Resume deletion from Cloudinary implemented
+Buffer-to-stream upload flow implemented
+Resume persistence in PostgreSQL implemented
+Resume upsert logic implemented
+Resume retrieval endpoint completed
+Foreign key issue debugged and fixed
+Resume upload testing completed
+```
+
+---
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Phase 2 Day 6
+
+PDF Text Extraction
+Resume Parsing
+Extract Resume Content
+Prepare Data For AI Analysis
+```
+
+This will allow TalentBridge to read resume content and prepare it for ATS scoring, skill analysis, and AI-powered candidate matching.
