@@ -1584,3 +1584,336 @@ Resume upload infrastructure
 ```
 
 This will prepare the backend for Cloudinary integration and resume storage in later phases.
+
+## Phase 2 Day 4 Notes
+
+### What I Learned
+
+Today I learned how file uploads work in a Node.js backend.
+
+Until now, all APIs in TalentBridge accepted JSON data using:
+
+```js
+express.json()
+```
+
+Examples:
+
+```json
+{
+  "name": "Aman",
+  "email": "aman@gmail.com"
+}
+```
+
+However, resume uploads are different because files cannot be sent as normal JSON requests.
+
+I learned that file uploads use:
+
+```txt
+multipart/form-data
+```
+
+instead of:
+
+```txt
+application/json
+```
+
+This is why a dedicated file upload middleware is required.
+
+---
+
+### Introduction to Multer
+
+Today I learned Multer, a middleware used for handling file uploads in Express applications.
+
+Multer processes incoming files and makes them available inside:
+
+```js
+req.file
+```
+
+for single file uploads.
+
+This allows the backend to access information such as:
+
+```txt
+File name
+File size
+File type
+File buffer
+```
+
+before saving the file anywhere.
+
+---
+
+### Memory Storage vs Disk Storage
+
+Multer provides multiple storage options.
+
+I learned about:
+
+```js
+multer.memoryStorage()
+```
+
+and
+
+```js
+multer.diskStorage()
+```
+
+For TalentBridge, I chose:
+
+```js
+multer.memoryStorage()
+```
+
+because the uploaded resume will later be sent directly to Cloudinary.
+
+Flow:
+
+```txt
+Student Uploads PDF
+        ↓
+Multer Memory Storage
+        ↓
+req.file.buffer
+        ↓
+Cloudinary
+```
+
+This avoids unnecessary disk writes and is a common approach in modern cloud-based applications.
+
+---
+
+### Upload Middleware
+
+I created:
+
+```txt
+src/middleware/upload.middleware.js
+```
+
+This middleware handles:
+
+```txt
+Storage configuration
+File type validation
+File size validation
+```
+
+The middleware is reusable and can be used by future upload features.
+
+---
+
+### PDF Validation
+
+TalentBridge only accepts resumes in PDF format.
+
+I implemented file filtering using:
+
+```js
+file.mimetype
+```
+
+Allowed:
+
+```txt
+application/pdf
+```
+
+Rejected:
+
+```txt
+image/jpeg
+image/png
+application/msword
+application/vnd.openxmlformats-officedocument.wordprocessingml.document
+```
+
+This prevents unsupported files from reaching the application.
+
+---
+
+### File Size Validation
+
+I added a maximum file size limit of:
+
+```txt
+5 MB
+```
+
+using:
+
+```js
+limits: {
+  fileSize: 5 * 1024 * 1024
+}
+```
+
+This helps:
+
+```txt
+Reduce abuse
+Improve performance
+Avoid unnecessary storage usage
+```
+
+while still supporting normal resume PDFs.
+
+---
+
+### Resume Upload Route Update
+
+I updated:
+
+```txt
+POST /api/resumes/upload
+```
+
+and added Multer middleware.
+
+Current request flow:
+
+```txt
+Request
+↓
+JWT Authentication
+↓
+Role Authorization
+↓
+Multer Upload Middleware
+↓
+Controller
+↓
+Response
+```
+
+Only authenticated students can upload resumes.
+
+---
+
+### Upload Controller Improvement
+
+Inside the upload controller, I learned how to access:
+
+```js
+req.file
+```
+
+and extract useful metadata.
+
+Current response includes:
+
+```txt
+File name
+File size
+MIME type
+```
+
+This confirms that the upload pipeline is working correctly before integrating cloud storage.
+
+---
+
+### Why Upload Infrastructure Was Built First
+
+Instead of immediately uploading files to Cloudinary, I first completed the upload infrastructure.
+
+This approach follows the principle of building systems in layers:
+
+```txt
+Database Design
+↓
+Module Design
+↓
+Upload Infrastructure
+↓
+Cloud Storage
+↓
+Resume Parsing
+↓
+AI Analysis
+```
+
+This makes debugging easier and reduces complexity.
+
+---
+
+### What I Tested
+
+Upload tests:
+
+```txt
+Valid PDF upload succeeds
+Invalid JPG upload is rejected
+Invalid PNG upload is rejected
+Invalid DOCX upload is rejected
+Missing file upload is rejected
+File size limit is enforced
+req.file metadata is available
+Student can access upload route
+Recruiter is blocked from upload route
+Unauthenticated requests are blocked
+```
+
+All tests passed successfully.
+
+---
+
+### My Understanding
+
+Today I understood that file uploads are fundamentally different from normal API requests.
+
+Key concepts learned:
+
+```txt
+multipart/form-data
+Multer
+memoryStorage
+req.file
+File validation
+File size limits
+Upload middleware
+```
+
+I also learned why upload infrastructure should be completed before integrating external storage services such as Cloudinary.
+
+---
+
+### What Is Completed In Phase 2 Day 4
+
+Completed today:
+
+```txt
+Multer installed
+Upload middleware created
+Memory storage configured
+PDF-only uploads implemented
+File size validation implemented
+Resume upload route updated
+Resume upload controller updated
+req.file handling implemented
+Upload infrastructure testing completed
+```
+
+---
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Phase 2 Day 5
+
+Cloudinary account setup
+Cloudinary SDK integration
+Upload PDF to Cloudinary
+Store Cloudinary URL
+Store Resume record in PostgreSQL
+Return uploaded resume details
+```
+
+This will complete the first version of the resume storage system and prepare the platform for resume parsing and AI analysis.
