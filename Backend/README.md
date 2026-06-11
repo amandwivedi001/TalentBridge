@@ -4212,3 +4212,278 @@ GET /api/jobs/:id
 ```
 
 Students will be able to browse available job opportunities created by recruiters and view complete job details before applying.
+
+## Phase 3 Day 2 Notes
+
+### What I Learned
+
+Today I continued the Job Management module by implementing job discovery features for students.
+
+Yesterday, recruiters gained the ability to create and manage job postings. However, students had no way to view those opportunities.
+
+Today I connected the student side with the recruiter side by allowing students to browse available jobs and view complete job details.
+
+The new workflow is:
+
+```txt
+Recruiter
+    ↓
+Create Job
+    ↓
+Store Job
+
+Student
+    ↓
+View Jobs
+    ↓
+View Job Details
+```
+
+This is the first direct interaction between both user roles in TalentBridge.
+
+### Get All Jobs API
+
+Implemented:
+
+```http
+GET /api/jobs
+```
+
+Purpose:
+
+```txt
+Fetch all active jobs available on the platform
+```
+
+Features:
+
+```txt
+Only active jobs are returned
+Latest jobs appear first
+Recruiter information included
+Protected route
+```
+
+The endpoint allows students to discover opportunities created by recruiters.
+
+### Job Listing Query Design
+
+I used Prisma's:
+
+```txt
+findMany()
+```
+
+with filtering and sorting.
+
+Features implemented:
+
+```txt
+isActive filter
+createdAt descending order
+recruiter information included
+```
+
+This ensures students only see currently available jobs.
+
+### Recruiter Information in Job Listings
+
+Instead of returning only job data, I included limited recruiter information.
+
+Returned fields:
+
+```txt
+companyName
+companyLocation
+designation
+```
+
+This provides useful context to students while browsing jobs.
+
+I used:
+
+```txt
+select
+```
+
+instead of returning the entire recruiter object.
+
+This follows good API design practices by exposing only the required data.
+
+### Job Details API
+
+Used existing endpoint:
+
+```http
+GET /api/jobs/:id
+```
+
+Purpose:
+
+```txt
+Fetch complete details of a specific job
+```
+
+This endpoint can now be used by both:
+
+```txt
+Recruiters
+Students
+```
+
+Students can open a job and view:
+
+```txt
+Job title
+Role
+Description
+Required skills
+Eligibility criteria
+Company information
+```
+
+before deciding whether to apply.
+
+### API Access Design
+
+I learned that some endpoints should be shared between multiple user roles.
+
+Example:
+
+```txt
+GET /api/jobs/:id
+```
+
+can be accessed by:
+
+```txt
+Student
+Recruiter
+```
+
+because both users need to view job details.
+
+This prevents unnecessary duplication of APIs.
+
+### Database Query Optimization
+
+I learned the importance of returning only required fields.
+
+Instead of:
+
+```txt
+Returning full recruiter data
+```
+
+I used:
+
+```txt
+select
+```
+
+to return only:
+
+```txt
+companyName
+companyLocation
+designation
+```
+
+This improves API efficiency and security.
+
+### What I Tested
+
+Get All Jobs API:
+
+```txt
+Student can fetch jobs
+Recruiter can fetch jobs
+Only active jobs returned
+Jobs ordered correctly
+Recruiter details included
+```
+
+Get Job By Id API:
+
+```txt
+Student can view job details
+Recruiter can view job details
+Specific job fetched correctly
+Invalid job id handled properly
+```
+
+Database Tests:
+
+```txt
+Jobs fetched successfully
+Recruiter relationship verified
+Sorting works correctly
+```
+
+All tests passed successfully.
+
+### What Is Completed In Phase 3 Day 2
+
+Completed today:
+
+```txt
+Get All Jobs API completed
+Student job discovery implemented
+Recruiter information added to job listings
+Job listing filtering implemented
+Job sorting implemented
+Shared job details access implemented
+Database queries optimized using select
+API testing completed
+Database testing completed
+```
+
+### Current TalentBridge Workflow
+
+Current platform workflow:
+
+```txt
+Student
+    ↓
+Profile Completion
+    ↓
+Resume Upload
+    ↓
+AI Resume Analysis
+    ↓
+Browse Jobs
+    ↓
+View Job Details
+
+Recruiter
+    ↓
+Profile Completion
+    ↓
+Create Job
+    ↓
+Manage Jobs
+```
+
+Students can now discover and explore opportunities posted by recruiters.
+
+### Next Goal
+
+Next phase:
+
+```txt
+Phase 3 Day 3
+```
+
+Build the Application System.
+
+Upcoming features:
+
+```txt
+Application model
+Apply to job API
+View applied jobs
+Recruiter applicant list
+Application tracking
+```
+
+This will allow students to start applying for jobs and recruiters to start receiving applicants.

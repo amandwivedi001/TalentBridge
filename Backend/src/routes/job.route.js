@@ -4,6 +4,7 @@ import {
   createJob,
   getMyJobs,
   getJobById,
+  getAllJobs,
 } from "../controllers/job.controller.js";
 
 import {
@@ -38,6 +39,12 @@ router.get(
   "/:id",
   protect,
   getJobById
+);
+
+router.get(
+  "/",
+  protect,
+  getAllJobs
 );
 
 export default router;

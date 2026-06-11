@@ -98,3 +98,34 @@ export const getJobById = asyncHandler(async (req, res) => {
     )
   );
 });
+
+export const getAllJobs = asyncHandler(async (req, res) => {
+  const jobs = await prisma.job.findMany({
+    where: {
+      isActive: true,
+    },
+
+    orderBy: {
+      createdAt: "desc",
+    },
+
+    include: {
+      recruiter: {
+        select: {
+          id: true,
+          companyName: true,
+          companyLocation: true,
+          designation: true,
+        },
+      },
+    },
+  });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      jobs,
+      "Jobs fetched successfully"
+    )
+  );
+});
