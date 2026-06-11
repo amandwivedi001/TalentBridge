@@ -52,11 +52,83 @@ export const analyzeMyResume = asyncHandler(async (req, res) => {
     resumeText
   );
 
+  const savedAnalysis =
+  await prisma.resumeAnalysis.upsert({
+    where: {
+      resumeId: resume.id,
+    },
+
+    update: {
+      atsScore: analysis.atsScore,
+      summary: analysis.summary,
+      skills: analysis.skills,
+      missingSkills: analysis.missingSkills,
+      strengths: analysis.strengths,
+      weaknesses: analysis.weaknesses,
+      suggestions: analysis.suggestions,
+    },
+
+    create: {
+      resumeId: resume.id,
+      atsScore: analysis.atsScore,
+      summary: analysis.summary,
+      skills: analysis.skills,
+      missingSkills: analysis.missingSkills,
+      strengths: analysis.strengths,
+      weaknesses: analysis.weaknesses,
+      suggestions: analysis.suggestions,
+    },
+  });
+
   return res.status(200).json(
     new ApiResponse(
       200,
-      analysis,
+      savedAnalysis,
       "Resume analyzed successfully"
     )
   );
 });
+
+
+export const getMyAnalysis = asyncHandler(
+  async (req, res) => {
+    const studentId =
+      req.user.studentProfile.id;
+
+    const resume =
+      await prisma.resume.findUnique({
+        where: {
+          studentId,
+        },
+      });
+
+    if (!resume) {
+      throw new ApiError(
+        404,
+        "Resume not found"
+      );
+    }
+
+    const analysis =
+      await prisma.resumeAnalysis.findUnique({
+        where: {
+          resumeId: resume.id,
+        },
+      });
+
+    if (!analysis) {
+      throw new ApiError(
+        404,
+        "Resume analysis not found"
+      );
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        analysis,
+        "Resume analysis fetched successfully"
+      )
+    );
+  }
+);
