@@ -3957,3 +3957,258 @@ Suggestions Display
 ```
 
 This will transform the backend AI analysis into a visible feature that students can interact with directly.
+
+## Phase 3 Day 1 Notes
+
+### What I Learned
+
+Today I started the Job Management module of TalentBridge.
+
+Until now, the platform focused on student profiles, resume uploads, and AI-powered resume analysis. Recruiters could create profiles but had no way to publish job opportunities.
+
+Today I built the foundation that allows recruiters to create and manage jobs on the platform.
+
+This is an important milestone because job postings are the core of the recruitment workflow and will later be used for applications, AI candidate matching, and hiring decisions.
+
+### Job Model Design
+
+I created a new Prisma model:
+
+```txt
+Job
+```
+
+The Job model stores:
+
+```txt
+title
+role
+description
+requiredSkills
+location
+salary
+minCgpa
+minTenthPercentage
+minTwelfthPercentage
+isActive
+```
+
+These fields represent the requirements and eligibility criteria that recruiters can define while creating job opportunities.
+
+### Recruiter and Job Relationship
+
+I added a one-to-many relationship between recruiters and jobs.
+
+A recruiter can create multiple jobs.
+
+Relationship:
+
+```txt
+Recruiter
+    ↓
+Multiple Jobs
+```
+
+I added:
+
+```prisma
+jobs Job[]
+```
+
+inside the RecruiterProfile model and connected it with the Job model using Prisma relations.
+
+### Database Migration
+
+After updating the Prisma schema, I generated a migration and updated the database.
+
+Commands used:
+
+```bash
+npx prisma migrate dev --name add_job_model
+npx prisma generate
+```
+
+The Job table was successfully created in Neon PostgreSQL.
+
+### Job Validation
+
+I created:
+
+```txt
+src/validators/job.validator.js
+```
+
+and added Zod validation for all important fields.
+
+Validated fields:
+
+```txt
+title
+role
+description
+requiredSkills
+location
+salary
+minCgpa
+minTenthPercentage
+minTwelfthPercentage
+```
+
+This ensures that invalid job data is blocked before reaching the database.
+
+### Create Job API
+
+Implemented:
+
+```http
+POST /api/jobs
+```
+
+Purpose:
+
+```txt
+Create a new job posting
+```
+
+Only recruiters are allowed to access this endpoint.
+
+Protection used:
+
+```txt
+protect
+allowRoles("RECRUITER")
+```
+
+### Get Recruiter Jobs API
+
+Implemented:
+
+```http
+GET /api/jobs/my-jobs
+```
+
+Purpose:
+
+```txt
+Fetch all jobs created by the logged-in recruiter
+```
+
+Jobs are returned in descending order of creation time so the latest jobs appear first.
+
+### Get Job By ID API
+
+Implemented:
+
+```http
+GET /api/jobs/:id
+```
+
+Purpose:
+
+```txt
+Fetch complete details of a specific job
+```
+
+The endpoint also returns recruiter information such as:
+
+```txt
+companyName
+designation
+companyLocation
+```
+
+This information will later be displayed to students while viewing jobs.
+
+### What I Tested
+
+Create Job API:
+
+```txt
+Recruiter can create job
+Job data saved successfully
+Validation works correctly
+Student access blocked successfully
+```
+
+Get My Jobs API:
+
+```txt
+Recruiter can view all created jobs
+Jobs returned correctly
+Latest jobs appear first
+```
+
+Get Job By ID API:
+
+```txt
+Specific job fetched successfully
+Recruiter details included
+Invalid job handled correctly
+```
+
+Database Testing:
+
+```txt
+Job records created successfully
+Recruiter relationship verified
+Data visible in Neon PostgreSQL
+```
+
+### What Is Completed In Phase 3 Day 1
+
+Completed today:
+
+```txt
+Job model created
+Recruiter-Job relationship added
+Database migration completed
+Job table created in Neon
+Job validation implemented
+Create Job API completed
+Get My Jobs API completed
+Get Job By ID API completed
+Role-based protection implemented
+API testing completed
+Database testing completed
+```
+
+### Current TalentBridge Workflow
+
+Current platform flow:
+
+```txt
+Student
+    ↓
+Profile Completion
+    ↓
+Resume Upload
+    ↓
+AI Resume Analysis
+
+Recruiter
+    ↓
+Profile Completion
+    ↓
+Create Job
+    ↓
+Manage Jobs
+```
+
+The recruiter side of the hiring workflow is now functional.
+
+### Next Goal
+
+Next step:
+
+```txt
+Student Job Discovery
+```
+
+Upcoming APIs:
+
+```txt
+GET /api/jobs
+GET /api/jobs/:id
+```
+
+Students will be able to browse available job opportunities created by recruiters and view complete job details before applying.

@@ -17,6 +17,8 @@ import studentRoutes from "./routes/student.route.js";
 import recruiterRoutes from "./routes/recruiter.route.js";
 import resumeRoutes from "./routes/resume.route.js";
 import analyzeRoutes from "./routes/analysis.route.js";
+import jobRoutes from "./routes/job.route.js";
+
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -24,6 +26,7 @@ app.use("/api/student", studentRoutes);
 app.use("/api/recruiter", recruiterRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/analysis", analyzeRoutes);
+app.use("/api/jobs", jobRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

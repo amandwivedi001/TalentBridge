@@ -63,6 +63,8 @@ model RecruiterProfile {
   companyDescription String?
   designation        String?
 
+  jobs Job[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -108,4 +110,36 @@ model ResumeAnalysis {
   updatedAt DateTime @updatedAt
 
   resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+}
+
+model Job {
+  id String @id @default(cuid())
+
+  recruiterId String
+
+  title String
+
+  role String
+
+  description String
+
+  requiredSkills String[] @default([])
+
+  location String?
+
+  salary String?
+
+  minCgpa Float?
+
+  minTenthPercentage Float?
+
+  minTwelfthPercentage Float?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  recruiter RecruiterProfile @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
 }
