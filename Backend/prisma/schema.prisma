@@ -81,4 +81,31 @@ model Resume {
   uploadedAt DateTime @default(now())
 
   student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  analysis ResumeAnalysis?
+}
+
+model ResumeAnalysis {
+  id String @id @default(cuid())
+
+  resumeId String @unique
+
+  atsScore Int?
+
+  summary String?
+
+  skills String[] @default([])
+
+  missingSkills String[] @default([])
+
+  strengths String[] @default([])
+
+  weaknesses String[] @default([])
+
+  suggestions String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 }
