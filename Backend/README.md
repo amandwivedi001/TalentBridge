@@ -4487,3 +4487,381 @@ Application tracking
 ```
 
 This will allow students to start applying for jobs and recruiters to start receiving applicants.
+
+## Phase 3 Day 3 Notes
+
+### What I Learned
+
+Today I implemented the Application Management module of TalentBridge.
+
+Until yesterday, recruiters could create jobs and students could browse available opportunities, but students had no way to apply for jobs.
+
+Today I connected both sides of the platform by introducing the application workflow.
+
+The new flow is:
+
+```txt
+Recruiter
+    ↓
+Create Job
+    ↓
+Publish Job
+
+Student
+    ↓
+Browse Jobs
+    ↓
+View Job Details
+    ↓
+Apply To Job
+
+Recruiter
+    ↓
+View Applicants
+```
+
+This is the first complete recruitment workflow inside TalentBridge.
+
+### Application Model Design
+
+I created a new Prisma model:
+
+```txt
+Application
+```
+
+The Application model stores:
+
+```txt
+studentId
+jobId
+status
+createdAt
+updatedAt
+```
+
+Each application represents a student's interest in a specific job.
+
+### Application Status System
+
+I introduced an enum:
+
+```prisma
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  REJECTED
+  INTERVIEW
+  HIRED
+}
+```
+
+This status system will be used throughout the hiring process.
+
+Current default status:
+
+```txt
+APPLIED
+```
+
+Future recruiter actions will update the status as candidates move through the recruitment pipeline.
+
+### Database Relationships
+
+I created relationships between:
+
+```txt
+StudentProfile
+      ↓
+Application
+      ↓
+Job
+```
+
+This allows:
+
+```txt
+Student → Multiple Applications
+Job → Multiple Applicants
+```
+
+which reflects a real recruitment system.
+
+### Duplicate Application Prevention
+
+I added:
+
+```prisma
+@@unique([studentId, jobId])
+```
+
+This ensures:
+
+```txt
+One Student
+      ↓
+One Application
+      ↓
+One Job
+```
+
+A student cannot apply to the same job multiple times.
+
+This is an important production-level database constraint.
+
+### Database Indexing
+
+I added indexes:
+
+```prisma
+@@index([studentId])
+@@index([jobId])
+```
+
+These indexes improve query performance for:
+
+```txt
+Get My Applications
+Get Applicants For Job
+```
+
+This was my first experience using database indexing for optimization.
+
+### Apply To Job API
+
+Implemented:
+
+```http
+POST /api/applications/:jobId
+```
+
+Purpose:
+
+```txt
+Allow a student to apply for a job
+```
+
+Validation performed:
+
+```txt
+Job exists
+Job is active
+Duplicate application prevented
+```
+
+Only students can access this endpoint.
+
+### My Applications API
+
+Implemented:
+
+```http
+GET /api/applications/my-applications
+```
+
+Purpose:
+
+```txt
+Fetch all applications submitted by the logged-in student
+```
+
+Returned information includes:
+
+```txt
+Job title
+Role
+Location
+Salary
+Application status
+```
+
+Applications are sorted by newest first.
+
+### Recruiter Applicant List API
+
+Implemented:
+
+```http
+GET /api/applications/job/:jobId
+```
+
+Purpose:
+
+```txt
+Fetch all applicants for a specific job
+```
+
+Security checks implemented:
+
+```txt
+Job exists
+Recruiter owns the job
+Unauthorized access blocked
+```
+
+Recruiters can now view:
+
+```txt
+Student name
+Student email
+Application status
+Application date
+```
+
+for each applicant.
+
+### Ownership-Based Access Control
+
+Today I learned an important authorization concept.
+
+A recruiter should only be able to access applicants for jobs they created.
+
+Before returning applicant data, I verify:
+
+```txt
+Job recruiterId
+      ==
+Logged-in recruiterId
+```
+
+This prevents recruiters from accessing other recruiters' applicant data.
+
+### Prisma Relationship Queries
+
+I practiced advanced Prisma queries using:
+
+```txt
+include
+select
+relations
+```
+
+to retrieve related data from:
+
+```txt
+Application
+StudentProfile
+User
+Job
+```
+
+within a single query.
+
+### What I Tested
+
+Apply To Job API:
+
+```txt
+Student can apply successfully
+Application saved successfully
+Inactive jobs blocked
+Duplicate applications blocked
+Recruiter access blocked
+```
+
+My Applications API:
+
+```txt
+Student can view applications
+Application status returned correctly
+Job information returned correctly
+Applications ordered correctly
+```
+
+Applicant List API:
+
+```txt
+Recruiter can view applicants
+Applicant details returned correctly
+Ownership validation works
+Unauthorized recruiter blocked
+```
+
+Database Tests:
+
+```txt
+Application row created successfully
+Student relationship verified
+Job relationship verified
+Unique constraint verified
+Indexes working correctly
+```
+
+All tests passed successfully.
+
+### What Is Completed In Phase 3 Day 3
+
+Completed today:
+
+```txt
+Application model created
+ApplicationStatus enum created
+Student-Application relationship added
+Job-Application relationship added
+Database indexes added
+Migration completed
+Application table created
+Apply To Job API completed
+Duplicate application prevention implemented
+My Applications API completed
+Recruiter Applicant List API completed
+Ownership authorization implemented
+API testing completed
+Database testing completed
+```
+
+### Current TalentBridge Workflow
+
+Current platform workflow:
+
+```txt
+Student
+    ↓
+Profile Completion
+    ↓
+Resume Upload
+    ↓
+AI Resume Analysis
+    ↓
+Browse Jobs
+    ↓
+View Job Details
+    ↓
+Apply To Job
+
+Recruiter
+    ↓
+Profile Completion
+    ↓
+Create Job
+    ↓
+Manage Jobs
+    ↓
+View Applicants
+```
+
+The core recruitment workflow is now operational.
+
+### Next Goal
+
+Next phase:
+
+```txt
+Phase 3 Day 4
+```
+
+Build AI Candidate Matching.
+
+Upcoming features:
+
+```txt
+CandidateMatch model
+Resume vs Job comparison
+Gemini-based matching
+Match score generation
+Matched skills detection
+Missing skills detection
+Recruiter ranking system
+```
+
+This feature will automatically rank candidates for recruiters based on how well their resumes match job requirements.
