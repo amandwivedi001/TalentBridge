@@ -3099,3 +3099,434 @@ ResumeAnalysis Database Storage
 ```
 
 This will be the first true AI-powered feature of TalentBridge and will generate ATS scores, skill analysis, strengths, weaknesses, and improvement suggestions automatically.
+
+## Phase 2 Day 8 Notes
+
+### What I Learned
+
+Today I completed the first AI-powered feature of TalentBridge.
+
+Until now, the platform could:
+
+```txt
+Resume Upload
+      ↓
+Cloudinary
+      ↓
+PDF Download
+      ↓
+Text Extraction
+```
+
+The system could understand resume content, but it could not analyze it.
+
+Today I integrated Google's Gemini API and built a complete AI analysis pipeline that converts a resume into structured insights.
+
+The new flow is:
+
+```txt
+Resume PDF
+      ↓
+Text Extraction
+      ↓
+Gemini AI
+      ↓
+Structured JSON Analysis
+```
+
+This is the first feature that transforms TalentBridge from a standard recruitment platform into an AI-powered recruitment platform.
+
+---
+
+### Gemini API Integration
+
+I integrated Google's Gemini API using:
+
+```bash
+npm install @google/genai
+```
+
+and configured the application using:
+
+```env
+GEMINI_API_KEY
+```
+
+The Gemini API is responsible for understanding resume content and generating structured analysis results.
+
+---
+
+### Gemini Service Layer
+
+I created:
+
+```txt
+src/services/gemini.service.js
+```
+
+This service is responsible for:
+
+```txt
+Resume Analysis
+ATS Scoring
+Skill Detection
+Strength Analysis
+Weakness Detection
+Improvement Suggestions
+```
+
+The service follows the same architecture used throughout the project:
+
+```txt
+Controller
+      ↓
+Service Layer
+      ↓
+External Provider
+```
+
+This keeps business logic separate from third-party integrations.
+
+---
+
+### Prompt Engineering
+
+Today I learned the importance of prompt engineering.
+
+Instead of asking Gemini:
+
+```txt
+Analyze this resume
+```
+
+I created a structured prompt that clearly defines:
+
+```txt
+Expected Output
+Field Types
+Response Rules
+Validation Constraints
+```
+
+This significantly improves response consistency.
+
+---
+
+### Structured JSON Responses
+
+The biggest lesson today was learning how to force AI responses into a predictable structure.
+
+Expected schema:
+
+```json
+{
+  "atsScore": 82,
+  "summary": "Strong frontend profile",
+  "skills": ["React", "Node.js"],
+  "missingSkills": ["Docker"],
+  "strengths": ["Strong projects"],
+  "weaknesses": ["No internship experience"],
+  "suggestions": ["Learn Docker"]
+}
+```
+
+This makes AI output directly usable by the backend and frontend.
+
+---
+
+### JSON Parsing and Validation
+
+I implemented logic to:
+
+```txt
+Remove Markdown Wrappers
+Clean Response Text
+Parse JSON
+Normalize Missing Fields
+```
+
+Gemini occasionally returns:
+
+````txt
+```json
+{
+  ...
+}
+````
+
+````
+
+before the JSON response.
+
+I learned how to clean these wrappers before parsing.
+
+This prevents runtime parsing errors.
+
+---
+
+### Response Normalization
+
+After parsing Gemini output, I normalized the response.
+
+Examples:
+
+```txt
+Missing Array
+      ↓
+Empty Array
+
+Missing String
+      ↓
+Empty String
+
+Invalid Score
+      ↓
+Default Value
+````
+
+This ensures that frontend components always receive predictable data.
+
+---
+
+### Retry Mechanism
+
+While testing Gemini integration, I encountered:
+
+```txt
+429 Too Many Requests
+503 Service Unavailable
+```
+
+These errors occurred because the Gemini free tier occasionally experiences high demand.
+
+To improve reliability, I implemented automatic retry logic.
+
+Workflow:
+
+```txt
+Request
+   ↓
+Failure
+   ↓
+Retry
+   ↓
+Failure
+   ↓
+Retry
+   ↓
+Success
+```
+
+---
+
+### Exponential Backoff
+
+I implemented exponential backoff using:
+
+```js
+Math.pow(2, attempt) * 1000
+```
+
+Retry delays:
+
+```txt
+Attempt 1 → 2 seconds
+Attempt 2 → 4 seconds
+Attempt 3 → 8 seconds
+```
+
+This prevents sending repeated requests too quickly and improves success rates.
+
+---
+
+### Retryable Error Handling
+
+I learned that not every error should be retried.
+
+Retryable errors:
+
+```txt
+429
+500
+502
+503
+504
+```
+
+Non-retryable errors:
+
+```txt
+400
+401
+403
+```
+
+This makes the retry mechanism smarter and more efficient.
+
+---
+
+### Analysis Controller
+
+I created the analysis controller workflow:
+
+```txt
+Find Resume
+      ↓
+Download PDF
+      ↓
+Convert To Buffer
+      ↓
+Extract Resume Text
+      ↓
+Gemini Analysis
+      ↓
+Return Structured JSON
+```
+
+This endpoint now acts as the complete AI analysis pipeline.
+
+---
+
+### Analysis Test Endpoint
+
+I implemented:
+
+```txt
+GET /api/analysis/test
+```
+
+Purpose:
+
+```txt
+Validate Gemini Integration
+Validate Resume Analysis
+Validate Structured JSON Output
+```
+
+This endpoint is currently used for development and testing.
+
+---
+
+### Successful End-to-End AI Flow
+
+Today I achieved:
+
+```txt
+Student Resume
+      ↓
+Cloudinary
+      ↓
+PDF Extraction
+      ↓
+Gemini Analysis
+      ↓
+Structured JSON
+      ↓
+API Response
+```
+
+This is the first complete AI workflow in TalentBridge.
+
+---
+
+### What I Tested
+
+Gemini integration tests:
+
+```txt
+Resume downloaded successfully
+Resume text extracted successfully
+Gemini API called successfully
+JSON response returned successfully
+JSON parsing completed successfully
+Retry mechanism tested
+Analysis endpoint tested
+ATS score returned
+Skills extracted correctly
+Suggestions generated correctly
+```
+
+All tests passed successfully.
+
+---
+
+### My Understanding
+
+Today I learned several important AI engineering concepts:
+
+```txt
+Prompt Engineering
+Structured Outputs
+JSON Response Design
+Response Normalization
+Retry Logic
+Exponential Backoff
+AI Service Architecture
+LLM Integration
+Error Recovery
+```
+
+I also learned that integrating AI into production systems requires much more than simply calling an API. Reliability, response formatting, validation, and error handling are equally important.
+
+---
+
+### What Is Completed In Phase 2 Day 8
+
+Completed today:
+
+```txt
+Gemini SDK installed
+Gemini service created
+Resume analysis prompt created
+Structured JSON output implemented
+JSON parsing implemented
+Response normalization implemented
+Retry mechanism implemented
+Exponential backoff implemented
+Analysis controller implemented
+Analysis test endpoint created
+Resume analysis pipeline completed
+End-to-end AI testing completed
+```
+
+---
+
+### Current TalentBridge Architecture
+
+Current workflow:
+
+```txt
+Student Login
+      ↓
+Resume Upload
+      ↓
+Cloudinary Storage
+      ↓
+PDF Download
+      ↓
+Text Extraction
+      ↓
+Gemini Analysis
+      ↓
+Structured JSON Response
+```
+
+The platform can now automatically analyze resumes using AI.
+
+---
+
+### What Comes Next
+
+Next phase:
+
+```txt
+Phase 2 Day 9
+
+Store Analysis In PostgreSQL
+ResumeAnalysis Upsert
+Analysis Persistence
+GET Analysis Endpoint
+Resume Analysis Backend Completion
+```
+
+This will allow AI-generated resume insights to be permanently stored and displayed without re-calling Gemini every time.

@@ -16,12 +16,14 @@ import authRoutes from "./routes/auth.route.js";
 import studentRoutes from "./routes/student.route.js";
 import recruiterRoutes from "./routes/recruiter.route.js";
 import resumeRoutes from "./routes/resume.route.js";
+import analyzeRoutes from "./routes/analysis.route.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/recruiter", recruiterRoutes);
 app.use("/api/resumes", resumeRoutes);
+app.use("/api/analysis", analyzeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
