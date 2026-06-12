@@ -1,4 +1,5 @@
 import prisma from "../config/prisma.js";
+import { generateCandidateMatchForApplication } from "../services/CandidateMatch.service.js";
 
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -23,6 +24,33 @@ export const applyToJob = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Job is no longer accepting applications");
     }
 
+    const student = await prisma.studentProfile.findUnique({
+        where: {
+            id: studentId,
+        },
+        include: {
+            resume: {
+                include: {
+                    analysis: true,
+                },
+            },
+        },
+    });
+
+    if (!student.resume) {
+        throw new ApiError(
+            400,
+            "Please upload your resume before applying"
+        );
+    }
+
+    if (!student.resume.analysis) {
+        throw new ApiError(
+            400,
+            "Resume analysis is required before applying"
+        );
+    }
+
     try {
         const application =
             await prisma.application.create({
@@ -31,6 +59,10 @@ export const applyToJob = asyncHandler(async (req, res) => {
                     jobId,
                 },
             });
+
+        await generateCandidateMatchForApplication(
+            application.id
+        );
 
         return res.status(201).json(
             new ApiResponse(

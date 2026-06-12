@@ -4865,3 +4865,365 @@ Recruiter ranking system
 ```
 
 This feature will automatically rank candidates for recruiters based on how well their resumes match job requirements.
+
+
+# Phase 3 - Day 4 Progress Report
+
+## AI Candidate Matching & Ranking System Completed
+
+Today I completed the core AI recruitment engine of **TalentBridge**.
+
+This feature enables recruiters to automatically evaluate, rank, and shortlist candidates based on resume analysis and job requirements.
+
+---
+
+# CandidateMatch Model Added
+
+Created a dedicated database model to store AI candidate matching results.
+
+### Fields
+
+* `matchScore`
+* `matchedSkills`
+* `missingSkills`
+* `reasoning`
+* `applicationId`
+
+### Purpose
+
+```text
+Application
+    ↓
+Stores Hiring Process
+
+CandidateMatch
+    ↓
+Stores AI Evaluation
+```
+
+This design keeps the database structure clean, scalable, and maintainable.
+
+---
+
+# Eligibility Checking System Added
+
+Implemented an eligibility validation layer before AI matching.
+
+## Academic Data Extraction From Resume
+
+The system now automatically extracts:
+
+* CGPA
+* 10th Percentage
+* 12th Percentage
+
+directly from uploaded resumes during AI analysis.
+
+### Why This Design?
+
+```text
+Resume
+   ↓
+Single Source Of Truth
+```
+
+Benefits:
+
+* No manual academic data entry
+* Avoids duplicate data
+* Prevents inconsistent records
+* Improves automation
+
+---
+
+# Resume Analysis Enhanced
+
+Enhanced Gemini Resume Analysis to additionally extract and store:
+
+* CGPA
+* 10th Percentage
+* 12th Percentage
+
+along with existing resume insights.
+
+## ResumeAnalysis Stores
+
+* ATS Score
+* Summary
+* Skills
+* CGPA
+* 10th Percentage
+* 12th Percentage
+* Strengths
+* Weaknesses
+* Suggestions
+* Missing Skills
+
+---
+
+# Eligibility Service Created
+
+### File
+
+```bash
+services/eligibility.service.js
+```
+
+### Responsibilities
+
+* Compare student CGPA with job requirements
+* Compare 10th percentage with job requirements
+* Compare 12th percentage with job requirements
+
+### Output
+
+```text
+Eligible
+```
+
+or
+
+```text
+Not Eligible + Reason
+```
+
+---
+
+# AI Matching Pipeline Improved
+
+## New Flow
+
+```text
+Application
+      ↓
+
+Eligibility Check
+
+      ↓
+
+Eligible?
+     /   \
+   No     Yes
+   ↓       ↓
+
+Score=0   Gemini Matching
+Reason      ↓
+Stored      ↓
+        CandidateMatch
+```
+
+### Benefits
+
+* Saves Gemini API calls
+* Improves performance
+* Reduces unnecessary processing
+* Mimics real-world ATS systems
+
+---
+
+# Candidate Matching Service Created
+
+### File
+
+```bash
+services/candidateMatch.service.js
+```
+
+### Responsibilities
+
+* Fetch Application
+* Validate Resume
+* Validate Resume Analysis
+* Run Eligibility Check
+* Generate AI Match
+* Store CandidateMatch
+* Return Result
+
+This service is reusable across the entire application.
+
+---
+
+# Auto Candidate Match Generation
+
+### Previous Workflow
+
+```text
+Student Applies
+      ↓
+Recruiter Generates Match Manually
+```
+
+### New Workflow
+
+```text
+Student Applies
+      ↓
+Application Created
+      ↓
+CandidateMatch Generated Automatically
+      ↓
+Stored In Database
+```
+
+### Result
+
+Recruiters no longer need to manually generate candidate matches.
+
+---
+
+# Match Generation Endpoint Refactored
+
+### Endpoint
+
+```http
+POST /api/matches/generate/:applicationId
+```
+
+The endpoint now uses the reusable Candidate Match Service.
+
+### Purpose
+
+Manual regeneration when:
+
+* Resume is updated
+* Job requirements are updated
+* Match needs to be recalculated
+
+---
+
+# Candidate Ranking Endpoint Created
+
+### Endpoint
+
+```http
+GET /api/matches/job/:jobId
+```
+
+### Features
+
+* Fetch all applicants
+* Fetch CandidateMatch data
+* Sort candidates by match score
+* Return ranked candidates
+
+### Example Ranking
+
+```text
+Aman      98%
+Rahul     84%
+Priya     77%
+```
+
+---
+
+# Eligibility-Aware Ranking
+
+Ineligible candidates are automatically ranked lower.
+
+### Example
+
+```text
+Aman        98%
+Priya       87%
+
+--------------------
+
+Shadow       0%
+
+Reason:
+Minimum 10th Percentage Criteria Not Met
+```
+
+This significantly improves recruiter decision-making.
+
+---
+
+# Final Recruitment Pipeline
+
+```text
+Resume Upload
+      ↓
+
+PDF Extraction
+      ↓
+
+Gemini Analysis
+      ↓
+
+Store ResumeAnalysis
+      ↓
+
+Apply To Job
+      ↓
+
+Eligibility Check
+      ↓
+
+AI Candidate Match
+      ↓
+
+Store CandidateMatch
+      ↓
+
+Recruiter Views Ranked Candidates
+```
+
+---
+
+# APIs Completed Today
+
+## Match Generation
+
+```http
+POST /api/matches/generate/:applicationId
+```
+
+## Candidate Ranking
+
+```http
+GET /api/matches/job/:jobId
+```
+
+---
+
+# Testing Completed
+
+| Feature                            | Status   |
+| ---------------------------------- | -------- |
+| Resume Upload                      | ✅ Passed |
+| Resume Analysis                    | ✅ Passed |
+| Academic Extraction                | ✅ Passed |
+| Eligibility Check                  | ✅ Passed |
+| Candidate Match Generation         | ✅ Passed |
+| Auto Match Generation During Apply | ✅ Passed |
+| Ranked Candidate API               | ✅ Passed |
+| Database Verification              | ✅ Passed |
+
+---
+
+# Database Verification
+
+Verified successful creation and storage of:
+
+* ResumeAnalysis records
+* CandidateMatch records
+* Match scores
+* Candidate rankings
+* Eligibility results
+
+---
+
+# Outcome
+
+Successfully completed the AI-powered Candidate Matching & Ranking System for TalentBridge.
+
+Recruiters can now:
+
+* Automatically evaluate applicants
+* Filter candidates through eligibility criteria
+* Generate AI-powered match scores
+* View ranked candidate lists
+* Reduce manual screening effort
+* Improve hiring efficiency through automation
+
+This completes the core AI recruitment pipeline for TalentBridge.

@@ -19,6 +19,7 @@ import resumeRoutes from "./routes/resume.route.js";
 import analyzeRoutes from "./routes/analysis.route.js";
 import jobRoutes from "./routes/job.route.js";
 import applicationRoutes from "./routes/application.route.js";
+import matchRoutes from "./routes/match.route.js";
 
 
 app.use("/api/health", healthRoutes);
@@ -29,6 +30,7 @@ app.use("/api/resumes", resumeRoutes);
 app.use("/api/analysis", analyzeRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applications",applicationRoutes);
+app.use("/api/matches",matchRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

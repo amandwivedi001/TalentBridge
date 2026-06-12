@@ -46,39 +46,46 @@ export const analyzeMyResume = asyncHandler(async (req, res) => {
   const buffer = Buffer.from(arrayBuffer);
 
   const resumeText = await extractTextFromPdf(buffer);
-  
+
 
   const analysis = await analyzeResume(
     resumeText
   );
 
   const savedAnalysis =
-  await prisma.resumeAnalysis.upsert({
-    where: {
-      resumeId: resume.id,
-    },
+    await prisma.resumeAnalysis.upsert({
+      where: {
+        resumeId: resume.id,
+      },
 
-    update: {
-      atsScore: analysis.atsScore,
-      summary: analysis.summary,
-      skills: analysis.skills,
-      missingSkills: analysis.missingSkills,
-      strengths: analysis.strengths,
-      weaknesses: analysis.weaknesses,
-      suggestions: analysis.suggestions,
-    },
+      update: {
+        atsScore: analysis.atsScore,
+        summary: analysis.summary,
+        skills: analysis.skills,
+        cgpa: analysis.cgpa,
 
-    create: {
-      resumeId: resume.id,
-      atsScore: analysis.atsScore,
-      summary: analysis.summary,
-      skills: analysis.skills,
-      missingSkills: analysis.missingSkills,
-      strengths: analysis.strengths,
-      weaknesses: analysis.weaknesses,
-      suggestions: analysis.suggestions,
-    },
-  });
+        tenthPercentage:
+          analysis.tenthPercentage,
+
+        twelfthPercentage:
+          analysis.twelfthPercentage,
+        missingSkills: analysis.missingSkills,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        suggestions: analysis.suggestions,
+      },
+
+      create: {
+        resumeId: resume.id,
+        atsScore: analysis.atsScore,
+        summary: analysis.summary,
+        skills: analysis.skills,
+        missingSkills: analysis.missingSkills,
+        strengths: analysis.strengths,
+        weaknesses: analysis.weaknesses,
+        suggestions: analysis.suggestions,
+      },
+    });
 
   return res.status(200).json(
     new ApiResponse(

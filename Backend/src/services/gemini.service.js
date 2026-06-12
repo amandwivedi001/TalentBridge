@@ -21,6 +21,9 @@ Response schema:
   "atsScore": number,
   "summary": string,
   "skills": string[],
+  "cgpa": float,
+  "tenthPercentage": float,
+  "twelfthPercentage": float,
   "missingSkills": string[],
   "strengths": string[],
   "weaknesses": string[],
@@ -83,6 +86,9 @@ ${resumeText}
         skills: Array.isArray(result.skills)
           ? result.skills
           : [],
+        cgpa: Number(result.cgpa) || 0.0,
+        tenthPercentage: Number(result.tenthPercentage) || 0.0,
+        twelfthPercentage: Number(result.twelfthPercentage) || 0.0,
         missingSkills: Array.isArray(
           result.missingSkills
         )
