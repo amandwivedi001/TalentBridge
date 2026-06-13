@@ -239,85 +239,208 @@ export const withdrawApplication =
     });
 
 export const updateApplicationStatus =
-  asyncHandler(async (req, res) => {
+    asyncHandler(async (req, res) => {
 
-    const { applicationId } = req.params;
+        const { applicationId } = req.params;
 
-    const { status } = req.body;
+        const { status } = req.body;
 
-    const recruiterId =
-      req.user.recruiterProfile.id;
+        const recruiterId =
+            req.user.recruiterProfile.id;
 
-    const allowedStatuses = [
-      "SHORTLISTED",
-      "INTERVIEW",
-      "HIRED",
-      "REJECTED",
-    ];
+        const allowedStatuses = [
+            "SHORTLISTED",
+            "INTERVIEW",
+            "HIRED",
+            "REJECTED",
+        ];
 
-    if (
-      !allowedStatuses.includes(status)
-    ) {
-      throw new ApiError(
-        400,
-        "Invalid application status"
-      );
-    }
+        if (
+            !allowedStatuses.includes(status)
+        ) {
+            throw new ApiError(
+                400,
+                "Invalid application status"
+            );
+        }
 
-    const application =
-      await prisma.application.findUnique({
+        const application =
+            await prisma.application.findUnique({
+                where: {
+                    id: applicationId,
+                },
+
+                include: {
+                    job: true,
+                },
+            });
+
+        if (!application) {
+            throw new ApiError(
+                404,
+                "Application not found"
+            );
+        }
+
+        if (
+            application.job.recruiterId !==
+            recruiterId
+        ) {
+            throw new ApiError(
+                403,
+                "Access denied"
+            );
+        }
+
+        if (
+            application.status ===
+            "WITHDRAWN"
+        ) {
+            throw new ApiError(
+                400,
+                "Cannot update a withdrawn application"
+            );
+        }
+
+        const updatedApplication =
+            await prisma.application.update({
+                where: {
+                    id: applicationId,
+                },
+
+                data: {
+                    status,
+                },
+            });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                updatedApplication,
+                "Application status updated successfully"
+            )
+        );
+    });
+
+
+export const getApplicationPipeline = asyncHandler(async (req, res) => {
+    const { jobId } = req.params;
+
+    const job = await prisma.job.findUnique({
         where: {
-          id: applicationId,
+            id: jobId,
         },
+    });
 
-        include: {
-          job: true,
-        },
-      });
-
-    if (!application) {
-      throw new ApiError(
-        404,
-        "Application not found"
-      );
+    if (!job) {
+        throw new ApiError(404, "Job not found");
     }
 
     if (
-      application.job.recruiterId !==
-      recruiterId
+        job.recruiterId !==
+        req.user.recruiterProfile.id
     ) {
-      throw new ApiError(
-        403,
-        "Access denied"
-      );
+        throw new ApiError(
+            403,
+            "Access denied"
+        );
     }
 
-    if (
-      application.status ===
-      "WITHDRAWN"
-    ) {
-      throw new ApiError(
-        400,
-        "Cannot update a withdrawn application"
-      );
+    const applications =
+        await prisma.application.findMany({
+            where: {
+                jobId,
+            },
+
+            include: {
+                student: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                            },
+                        },
+                    },
+                },
+
+                candidateMatch: true,
+            },
+        });
+
+    const pipeline = {
+        applied: [],
+        shortlisted: [],
+        interview: [],
+        hired: [],
+        rejected: [],
+        withdrawn: [],
+    };
+
+    for (const application of applications) {
+        const candidate = {
+            applicationId: application.id,
+
+            student: {
+                id: application.student.user.id,
+                name: application.student.user.name,
+                email: application.student.user.email,
+            },
+
+            status: application.status,
+
+            matchScore:
+                application.candidateMatch
+                    ?.matchScore || 0,
+
+            reasoning:
+                application.candidateMatch?.reasoning || null,
+            
+            updatedAt: application.updatedAt,
+        };
+
+        switch (application.status) {
+            case "APPLIED":
+                pipeline.applied.push(candidate);
+                break;
+
+            case "SHORTLISTED":
+                pipeline.shortlisted.push(candidate);
+                break;
+
+            case "INTERVIEW":
+                pipeline.interview.push(candidate);
+                break;
+
+            case "HIRED":
+                pipeline.hired.push(candidate);
+                break;
+
+            case "REJECTED":
+                pipeline.rejected.push(candidate);
+                break;
+
+            case "WITHDRAWN":
+                pipeline.withdrawn.push(candidate);
+                break;
+
+            default:
+                break;
+        }
     }
 
-    const updatedApplication =
-      await prisma.application.update({
-        where: {
-          id: applicationId,
-        },
-
-        data: {
-          status,
-        },
-      });
+    Object.values(pipeline).forEach((group) => {
+        group.sort(
+            (a, b) => b.matchScore - a.matchScore
+        );
+    });
 
     return res.status(200).json(
-      new ApiResponse(
-        200,
-        updatedApplication,
-        "Application status updated successfully"
-      )
+        new ApiResponse(
+            200,
+            pipeline,
+            "Application pipeline fetched successfully"
+        )
     );
-});
+})

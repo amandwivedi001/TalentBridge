@@ -6,6 +6,7 @@ import {
   getApplicantsForJob,
   withdrawApplication,
   updateApplicationStatus,
+  getApplicationPipeline,
 } from "../controllers/application.controller.js";
 
 import {
@@ -48,6 +49,13 @@ router.patch(
   protect,
   allowRoles("RECRUITER"),
   updateApplicationStatus
+);
+
+router.get(
+  "/job/:jobId/pipeline",
+  protect,
+  allowRoles("RECRUITER"),
+  getApplicationPipeline
 );
 
 export default router;
