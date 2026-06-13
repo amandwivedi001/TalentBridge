@@ -129,3 +129,133 @@ export const getAllJobs = asyncHandler(async (req, res) => {
     )
   );
 });
+
+export const updateJob = asyncHandler(async (req, res) => {
+  const recruiterId = req.user.recruiterProfile.id;
+  const { jobId } = req.params;
+
+  const {
+    title,
+    role,
+    description,
+    requiredSkills,
+    location,
+    salary,
+    minCgpa,
+    minTenthPercentage,
+    minTwelfthPercentage,
+  } = req.body;
+
+  const job = await prisma.job.findUnique({
+    where: {
+      id: jobId,
+    },
+    include: {
+      recruiter: {
+        select: {
+          id: true,
+          companyName: true,
+          designation: true,
+          companyLocation: true,
+        },
+      },
+    },
+  });
+
+  if (!job) {
+    throw new ApiError(
+      404,
+      "Job not found"
+    );
+  }
+
+  if (
+    job.recruiterId !==
+    req.user.recruiterProfile.id
+  ) {
+    throw new ApiError(
+      403,
+      "Access denied"
+    );
+  }
+
+  const updateData = await prisma.job.update({
+    where: {
+      id : jobId,
+    },
+
+    data: {
+      title,
+      role,
+      description,
+      requiredSkills,
+      location,
+      salary,
+      minCgpa,
+      minTenthPercentage,
+      minTwelfthPercentage,
+    },
+  })
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      updateData,
+      "Job Updated successfully"
+    )
+  );
+})
+
+export const deleteJob = asyncHandler(async (req, res) => {
+  const recruiterId = req.user.recruiterProfile.id;
+
+  const { jobId } = req.params;
+
+  const job = await prisma.job.findUnique({
+    where: {
+      id : jobId,
+    },
+    include: {
+      recruiter: {
+        select: {
+          id: true,
+          companyName: true,
+          designation: true,
+          companyLocation: true,
+        },
+      },
+    },
+  });
+
+  if (!job) {
+    throw new ApiError(
+      404,
+      "Job not found"
+    );
+  }
+
+  if (
+    job.recruiterId !==
+    req.user.recruiterProfile.id
+  ) {
+    throw new ApiError(
+      403,
+      "Access denied"
+    );
+  }
+
+  await prisma.job.delete({
+    where: {
+      id: jobId,
+    }
+  })
+
+  return res.status(200)
+    .json(
+      new ApiResponse(
+        200,
+        null,
+        "Job deleted successfully"
+      )
+    )
+})

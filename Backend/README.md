@@ -5227,3 +5227,280 @@ Recruiters can now:
 * Improve hiring efficiency through automation
 
 This completes the core AI recruitment pipeline for TalentBridge.
+
+# Phase 3 – Day 5: Job Management Completion
+
+## Overview
+
+Today, I completed the **Job Management Module** of TalentBridge by implementing **Job Update** and **Job Deletion** functionality.
+
+Before this update, recruiters could only create and view job postings. With today's implementation, recruiters can now fully manage the lifecycle of their jobs, including updating and deleting existing postings.
+
+This marks the completion of the core **Recruiter Job Management System**.
+
+---
+
+# Features Implemented
+
+## 1. Update Job API
+
+### Endpoint
+
+```http
+PATCH /api/jobs/:jobId
+```
+
+### Purpose
+
+Allows recruiters to modify their existing job postings.
+
+### Supported Fields
+
+* Job Title
+* Role
+* Description
+* Required Skills
+* Location
+* Salary
+* Minimum CGPA
+* Minimum 10th Percentage
+* Minimum 12th Percentage
+
+### Validation Implemented
+
+#### Job Existence Validation
+
+Before updating a job, the system verifies that the job exists in the database.
+
+```text
+Job Exists?
+    ↓
+Yes → Continue
+No  → Return Error
+```
+
+#### Ownership Validation
+
+Only the recruiter who created the job can update it.
+
+```text
+Job Recruiter ID
+        ==
+Logged-In Recruiter ID
+```
+
+If the IDs do not match, access is denied.
+
+### Database Operation
+
+Used Prisma Update Operation:
+
+```text
+Job
+ ↓
+Update Fields
+ ↓
+Save Changes
+```
+
+---
+
+## 2. Delete Job API
+
+### Endpoint
+
+```http
+DELETE /api/jobs/:jobId
+```
+
+### Purpose
+
+Allows recruiters to permanently remove job postings from the platform.
+
+### Validation Implemented
+
+#### Job Existence Validation
+
+The system verifies that the requested job exists before deletion.
+
+```text
+Job Exists?
+    ↓
+Yes → Continue
+No  → Return Error
+```
+
+#### Ownership Validation
+
+Only the recruiter who created the job can delete it.
+
+```text
+Job Recruiter ID
+        ==
+Logged-In Recruiter ID
+```
+
+This prevents unauthorized deletion of jobs belonging to other recruiters.
+
+### Database Operation
+
+Used Prisma Delete Operation:
+
+```text
+Job
+ ↓
+Delete Record
+ ↓
+Remove From Database
+```
+
+For the MVP version, hard deletion was chosen for simplicity and easier management.
+
+---
+
+# Security Improvements
+
+Implemented ownership-based authorization for both update and delete operations.
+
+## Protected Actions
+
+* Update Job
+* Delete Job
+
+### Security Rule
+
+```text
+Recruiter A
+      ❌
+Cannot Modify
+Recruiter B's Job
+```
+
+This ensures complete isolation of recruiter resources and prevents unauthorized access.
+
+---
+
+# API Testing Completed
+
+## Update Job API
+
+Verified:
+
+* Recruiter can update their own job
+* Job details update successfully
+* Required skills update correctly
+* Salary updates correctly
+* Eligibility criteria update correctly
+* Invalid job ID is handled properly
+* Unauthorized recruiter access is blocked
+
+### Result
+
+✅ Passed
+
+---
+
+## Delete Job API
+
+Verified:
+
+* Recruiter can delete their own job
+* Job is successfully removed from the database
+* Invalid job ID is handled properly
+* Unauthorized recruiter access is blocked
+
+### Result
+
+✅ Passed
+
+---
+
+# Final Recruiter Job Workflow
+
+```text
+Recruiter Login
+        ↓
+Create Job
+        ↓
+View Jobs
+        ↓
+View Job Details
+        ↓
+Update Job
+        ↓
+Delete Job
+```
+
+Recruiters now have complete control over their job postings.
+
+---
+
+# APIs Completed Today
+
+## Update Job
+
+```http
+PATCH /api/jobs/:jobId
+```
+
+## Delete Job
+
+```http
+DELETE /api/jobs/:jobId
+```
+
+---
+
+# Testing Results
+
+| Feature                        | Status   |
+| ------------------------------ | -------- |
+| Update Job                     | ✅ Passed |
+| Delete Job                     | ✅ Passed |
+| Ownership Validation           | ✅ Passed |
+| Database Verification          | ✅ Passed |
+| Unauthorized Access Protection | ✅ Passed |
+
+---
+
+# Key Learnings
+
+* Implementing resource ownership validation
+* Building secure update operations using Prisma
+* Building secure delete operations using Prisma
+* Protecting recruiter resources from unauthorized access
+* Designing complete CRUD workflows
+* Implementing production-style authorization checks
+* Managing recruiter-owned resources securely
+
+---
+
+# Current TalentBridge Status
+
+## Completed Modules
+
+* ✅ Authentication & Authorization
+* ✅ Student Profile Management
+* ✅ Recruiter Profile Management
+* ✅ Resume Upload System
+* ✅ Cloudinary Integration
+* ✅ PDF Parsing
+* ✅ AI Resume Analysis
+* ✅ Job Creation
+* ✅ Job Listing
+* ✅ Job Details
+* ✅ Job Update
+* ✅ Job Deletion
+* ✅ Application System
+* ✅ Eligibility Filtering
+* ✅ AI Candidate Matching
+* ✅ Auto Match Generation
+* ✅ Candidate Ranking
+
+---
+
+## Project Progress
+
+The recruiter-side job management system is now fully complete. Recruiters can create, view, update, and delete job postings while maintaining strict ownership-based access control.
+
+TalentBridge continues to evolve toward a complete AI-powered campus placement platform.

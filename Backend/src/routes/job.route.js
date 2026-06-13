@@ -5,6 +5,8 @@ import {
   getMyJobs,
   getJobById,
   getAllJobs,
+  deleteJob,
+  updateJob,
 } from "../controllers/job.controller.js";
 
 import {
@@ -45,6 +47,20 @@ router.get(
   "/",
   protect,
   getAllJobs
+);
+
+router.patch(
+  "/:jobId",
+  protect,
+  allowRoles("RECRUITER"),
+  updateJob
+);
+
+router.delete(
+  "/:jobId",
+  protect,
+  allowRoles("RECRUITER"),
+  deleteJob
 );
 
 export default router;
