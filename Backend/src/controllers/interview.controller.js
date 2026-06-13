@@ -3,7 +3,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 
-import { generateInterviewQuestions } from "../services/interview.service.js";
+import { evaluateAnswer, generateInterviewQuestions } from "../services/interview.service.js";
 
 export const startInterview = asyncHandler(
     async (req, res) => {
@@ -103,4 +103,80 @@ export const startInterview = asyncHandler(
             )
         );
     }
+);
+
+export const submitAnswer = asyncHandler(
+  async (req, res) => {
+    const studentId =
+      req.user.studentProfile.id;
+
+    const { questionId } = req.params;
+
+    const { answer } = req.body;
+
+    const question =
+      await prisma.interviewQuestion.findUnique({
+        where: {
+          id: questionId,
+        },
+
+        include: {
+          session: true,
+        },
+      });
+
+    if (!question) {
+      throw new ApiError(
+        404,
+        "Question not found"
+      );
+    }
+
+    if (
+      question.session.studentId !==
+      studentId
+    ) {
+      throw new ApiError(
+        403,
+        "Access denied"
+      );
+    }
+
+    const evaluation =
+      await evaluateAnswer(
+        question.question,
+        answer
+      );
+
+    const updatedQuestion =
+      await prisma.interviewQuestion.update({
+        where: {
+          id: questionId,
+        },
+
+        data: {
+          answer,
+          score: evaluation.score,
+          feedback:
+            evaluation.feedback,
+        },
+      });
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          questionId:
+            updatedQuestion.id,
+
+          score:
+            updatedQuestion.score,
+
+          feedback:
+            updatedQuestion.feedback,
+        },
+        "Answer evaluated successfully"
+      )
+    );
+  }
 );
