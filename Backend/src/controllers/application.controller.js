@@ -182,3 +182,142 @@ export const getApplicantsForJob =
             )
         );
     });
+
+export const withdrawApplication =
+    asyncHandler(async (req, res) => {
+
+        const { jobId } = req.params;
+
+        const studentId =
+            req.user.studentProfile.id;
+
+        const application =
+            await prisma.application.findUnique({
+                where: {
+                    studentId_jobId: {
+                        studentId,
+                        jobId,
+                    },
+                },
+            });
+
+        if (!application) {
+            throw new ApiError(
+                404,
+                "Application not found"
+            );
+        }
+
+        if (
+            application.status !==
+            "APPLIED"
+        ) {
+            throw new ApiError(
+                400,
+                `Application cannot be withdrawn because current status is ${application.status}`
+            );
+        }
+
+        const updatedApplication =
+            await prisma.application.update({
+                where: {
+                    id: application.id,
+                },
+
+                data: {
+                    status: "WITHDRAWN",
+                },
+            });
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                updatedApplication,
+                "Application withdrawn successfully"
+            )
+        );
+    });
+
+export const updateApplicationStatus =
+  asyncHandler(async (req, res) => {
+
+    const { applicationId } = req.params;
+
+    const { status } = req.body;
+
+    const recruiterId =
+      req.user.recruiterProfile.id;
+
+    const allowedStatuses = [
+      "SHORTLISTED",
+      "INTERVIEW",
+      "HIRED",
+      "REJECTED",
+    ];
+
+    if (
+      !allowedStatuses.includes(status)
+    ) {
+      throw new ApiError(
+        400,
+        "Invalid application status"
+      );
+    }
+
+    const application =
+      await prisma.application.findUnique({
+        where: {
+          id: applicationId,
+        },
+
+        include: {
+          job: true,
+        },
+      });
+
+    if (!application) {
+      throw new ApiError(
+        404,
+        "Application not found"
+      );
+    }
+
+    if (
+      application.job.recruiterId !==
+      recruiterId
+    ) {
+      throw new ApiError(
+        403,
+        "Access denied"
+      );
+    }
+
+    if (
+      application.status ===
+      "WITHDRAWN"
+    ) {
+      throw new ApiError(
+        400,
+        "Cannot update a withdrawn application"
+      );
+    }
+
+    const updatedApplication =
+      await prisma.application.update({
+        where: {
+          id: applicationId,
+        },
+
+        data: {
+          status,
+        },
+      });
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        updatedApplication,
+        "Application status updated successfully"
+      )
+    );
+});

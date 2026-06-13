@@ -5504,3 +5504,350 @@ DELETE /api/jobs/:jobId
 The recruiter-side job management system is now fully complete. Recruiters can create, view, update, and delete job postings while maintaining strict ownership-based access control.
 
 TalentBridge continues to evolve toward a complete AI-powered campus placement platform.
+
+# Phase 3 – Day 6: Application Lifecycle Management
+
+## Overview
+
+Today, I completed the **Application Lifecycle Management Module** of TalentBridge.
+
+Before this update, students could apply to jobs and recruiters could view applicants, but there was no way to withdraw applications or manage candidates through different stages of the hiring process.
+
+With today's implementation, TalentBridge now supports a complete **ATS (Applicant Tracking System) style workflow**, enabling structured candidate progression throughout the recruitment lifecycle.
+
+---
+
+# Features Implemented
+
+## 1. Application Withdrawal System
+
+Added support for students to withdraw previously submitted job applications.
+
+### New Status Added
+
+```text
+APPLIED
+SHORTLISTED
+INTERVIEW
+HIRED
+REJECTED
+WITHDRAWN
+```
+
+### Purpose
+
+Allows students to cancel their application before the recruiter begins processing it.
+
+---
+
+## 2. Withdraw Application API
+
+### Endpoint
+
+```http
+PATCH /api/applications/:jobId/withdraw
+```
+
+### Purpose
+
+Allows students to withdraw an application before it enters the recruitment pipeline.
+
+---
+
+### Business Rules Implemented
+
+#### Withdrawal Allowed
+
+```text
+APPLIED
+```
+
+#### Withdrawal Blocked
+
+```text
+SHORTLISTED
+INTERVIEW
+HIRED
+REJECTED
+WITHDRAWN
+```
+
+### Reason
+
+Once a recruiter starts evaluating a candidate, withdrawal is restricted to maintain recruitment workflow consistency and avoid impacting candidate evaluation processes.
+
+---
+
+### Withdrawal Flow
+
+```text
+Student Applies
+        ↓
+Status = APPLIED
+        ↓
+Withdraw Application
+        ↓
+Status = WITHDRAWN
+```
+
+---
+
+### Data Retention Strategy
+
+Instead of permanently deleting application records:
+
+```text
+Application Deleted ❌
+```
+
+The system preserves application history by updating status:
+
+```text
+Application Status = WITHDRAWN ✅
+```
+
+### Benefits
+
+* Preserves application history
+* Supports future analytics
+* Enables reporting and tracking
+* Maintains auditability of candidate actions
+
+---
+
+# 3. Recruiter Application Status Management
+
+### Endpoint
+
+```http
+PATCH /api/applications/:applicationId/status
+```
+
+### Purpose
+
+Allows recruiters to move candidates through different stages of the hiring process.
+
+---
+
+### Supported Status Updates
+
+```text
+SHORTLISTED
+INTERVIEW
+HIRED
+REJECTED
+```
+
+### Restricted Status Updates
+
+Recruiters cannot manually assign:
+
+```text
+APPLIED
+WITHDRAWN
+```
+
+These statuses are controlled automatically by the system.
+
+---
+
+# 4. Recruiter Ownership Validation
+
+Implemented recruiter ownership verification before allowing status updates.
+
+### Validation Flow
+
+```text
+Application
+      ↓
+Job
+      ↓
+Recruiter
+```
+
+Only the recruiter who owns the job posting can update application statuses.
+
+---
+
+### Security Protection
+
+```text
+Recruiter A
+      ❌
+Cannot Modify
+Recruiter B's Applications
+```
+
+This prevents unauthorized access and ensures complete recruiter isolation.
+
+---
+
+# 5. Withdrawn Application Protection
+
+Added safeguards to prevent recruiters from processing withdrawn applications.
+
+### Example
+
+```text
+Student Withdraws
+        ↓
+Status = WITHDRAWN
+        ↓
+Recruiter Cannot Shortlist
+```
+
+This guarantees consistency and integrity throughout the hiring process.
+
+---
+
+# Final Application Workflow
+
+## Student Side
+
+```text
+Apply To Job
+      ↓
+APPLIED
+      ↓
+WITHDRAWN (Optional)
+```
+
+---
+
+## Recruiter Side
+
+### Successful Hiring Path
+
+```text
+APPLIED
+     ↓
+SHORTLISTED
+     ↓
+INTERVIEW
+     ↓
+HIRED
+```
+
+### Rejection Path
+
+```text
+APPLIED
+     ↓
+REJECTED
+```
+
+---
+
+# APIs Completed Today
+
+## Withdraw Application
+
+```http
+PATCH /api/applications/:jobId/withdraw
+```
+
+## Update Application Status
+
+```http
+PATCH /api/applications/:applicationId/status
+```
+
+---
+
+# Validation Rules Implemented
+
+## Withdraw Application
+
+* Application must exist
+* Student must own the application
+* Application status must be `APPLIED`
+
+---
+
+## Update Application Status
+
+* Application must exist
+* Recruiter must own the associated job
+* Status must be valid
+* Withdrawn applications cannot be updated
+
+---
+
+# Testing Completed
+
+| Feature                          | Status   |
+| -------------------------------- | -------- |
+| Withdraw Application             | ✅ Passed |
+| Withdrawal Restriction           | ✅ Passed |
+| Status Update                    | ✅ Passed |
+| Recruiter Ownership Validation   | ✅ Passed |
+| Withdrawn Application Protection | ✅ Passed |
+| Database Verification            | ✅ Passed |
+
+---
+
+# Security Enhancements
+
+Implemented workflow-level security controls:
+
+* Ownership-based authorization
+* Status transition validation
+* Recruiter resource isolation
+* Student application ownership verification
+* Protection against unauthorized workflow manipulation
+* Withdrawn application safeguards
+
+---
+
+# Key Learnings
+
+* Designing ATS-style application workflows
+* Implementing status-driven business logic
+* Preserving application history through status management
+* Building ownership-based authorization systems
+* Protecting workflow integrity using validation rules
+* Managing candidate progression through hiring stages
+* Creating scalable application lifecycle architectures
+
+---
+
+# Current TalentBridge Status
+
+## Completed Modules
+
+* ✅ Authentication & Authorization
+* ✅ Student Profile Management
+* ✅ Recruiter Profile Management
+* ✅ Resume Upload & Analysis
+* ✅ Cloudinary Integration
+* ✅ PDF Parsing
+* ✅ AI Resume Analysis
+* ✅ Job Management
+* ✅ Application System
+* ✅ Application Withdrawal
+* ✅ Application Status Management
+* ✅ Eligibility Filtering
+* ✅ AI Candidate Matching
+* ✅ Auto Match Generation
+* ✅ Candidate Ranking
+
+---
+
+# Recruitment Workflow Status
+
+| Module                | Status     |
+| --------------------- | ---------- |
+| Job Management        | ✅ Complete |
+| Applications          | ✅ Complete |
+| Application Lifecycle | ✅ Complete |
+| Eligibility Filtering | ✅ Complete |
+| AI Candidate Matching | ✅ Complete |
+| Candidate Ranking     | ✅ Complete |
+
+---
+
+# Project Progress
+
+The complete application lifecycle system is now operational. Students can submit and withdraw applications, while recruiters can manage candidates through a structured recruitment pipeline.
+
+TalentBridge now supports a full ATS-style workflow with secure ownership validation, status management, workflow protection, and candidate progression tracking.

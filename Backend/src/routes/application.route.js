@@ -4,6 +4,8 @@ import {
   applyToJob,
   getMyApplications,
   getApplicantsForJob,
+  withdrawApplication,
+  updateApplicationStatus,
 } from "../controllers/application.controller.js";
 
 import {
@@ -32,6 +34,20 @@ router.get(
   protect,
   allowRoles("RECRUITER"),
   getApplicantsForJob
+);
+
+router.patch(
+  "/:jobId/withdraw",
+  protect,
+  allowRoles("STUDENT"),
+  withdrawApplication
+);
+
+router.patch(
+  "/:applicationId/status",
+  protect,
+  allowRoles("RECRUITER"),
+  updateApplicationStatus
 );
 
 export default router;

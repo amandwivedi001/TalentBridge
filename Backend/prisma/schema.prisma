@@ -160,6 +160,7 @@ enum ApplicationStatus {
   REJECTED
   INTERVIEW
   HIRED
+  WITHDRAWN
 }
 
 model Application {
