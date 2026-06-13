@@ -406,3 +406,126 @@ Rules:
     };
   }
 };
+
+export const generateFinalInterviewReport =
+  async (
+    interviewType,
+    difficulty,
+    questions
+  ) => {
+    const prompt = `
+You are an expert technical interviewer.
+
+Interview Type:
+${interviewType}
+
+Difficulty:
+${difficulty}
+
+Questions, Answers and Evaluations:
+
+${questions
+  .map(
+    (q, index) => `
+Question ${index + 1}:
+${q.question}
+
+Answer:
+${q.answer}
+
+Score:
+${q.score}
+
+Feedback:
+${q.feedback}
+`
+  )
+  .join("\n")}
+
+Analyze the candidate's overall performance.
+
+Return ONLY valid JSON:
+
+{
+  "strengths": [
+    "...",
+    "..."
+  ],
+  "weaknesses": [
+    "...",
+    "..."
+  ],
+  "improvementAreas": [
+    "...",
+    "..."
+  ],
+  "overallFeedback": "..."
+}
+
+Rules:
+- strengths must be an array.
+- weaknesses must be an array.
+- improvementAreas must be an array.
+- overallFeedback must be concise and actionable.
+- Return only JSON.
+`;
+
+    try {
+      // generateWithRetry already handles:
+      // - retries
+      // - exponential backoff
+      // - Gemini errors
+      // - JSON parsing
+
+      const parsed =
+        await generateWithRetry(
+          prompt,
+          0.3
+        );
+
+      return {
+        strengths: Array.isArray(
+          parsed?.strengths
+        )
+          ? parsed.strengths
+          : [],
+
+        weaknesses: Array.isArray(
+          parsed?.weaknesses
+        )
+          ? parsed.weaknesses
+          : [],
+
+        improvementAreas:
+          Array.isArray(
+            parsed?.improvementAreas
+          )
+            ? parsed.improvementAreas
+            : [],
+
+        overallFeedback:
+          typeof parsed?.overallFeedback ===
+          "string"
+            ? parsed.overallFeedback
+            : "",
+      };
+    } catch (error) {
+      console.error(
+        "Final Report Generation Error:",
+        error
+      );
+
+      return {
+        strengths: [
+          "Completed the interview successfully",
+        ],
+
+        weaknesses: [],
+
+        improvementAreas: [],
+
+        overallFeedback:
+          "Interview completed successfully, but a detailed AI report could not be generated at this time.",
+      };
+    }
+  };
