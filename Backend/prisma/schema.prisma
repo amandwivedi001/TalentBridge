@@ -50,6 +50,8 @@ model StudentProfile {
 
   applications Application[]
 
+  interviewSessions InterviewSession[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -204,4 +206,65 @@ model CandidateMatch {
   updatedAt DateTime @updatedAt
 
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+enum InterviewType {
+  RESUME_BASED
+  DSA
+  SKILL_BASED
+  HR
+}
+
+enum InterviewDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum InterviewStatus {
+  IN_PROGRESS
+  COMPLETED
+}
+
+model InterviewSession {
+  id String @id @default(cuid())
+
+  studentId String
+
+  interviewType InterviewType
+
+  difficulty InterviewDifficulty
+
+  skill String?
+
+  status InterviewStatus @default(IN_PROGRESS)
+
+  overallScore Int?
+
+  feedback String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  questions InterviewQuestion[]
+}
+
+model InterviewQuestion {
+  id String @id @default(cuid())
+
+  sessionId String
+
+  question String
+
+  answer String?
+
+  score Int?
+
+  feedback String?
+
+  createdAt DateTime @default(now())
+
+  session InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 }
