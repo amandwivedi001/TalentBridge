@@ -28,6 +28,8 @@ model User {
 
   studentProfile   StudentProfile?
   recruiterProfile RecruiterProfile?
+
+  notifications Notification[]
 }
 
 model StudentProfile {
@@ -273,4 +275,35 @@ model InterviewQuestion {
   createdAt DateTime @default(now())
 
   session InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+enum NotificationType {
+  APPLICATION_APPLIED
+  APPLICATION_WITHDRAWN
+  APPLICATION_SHORTLISTED
+  APPLICATION_REJECTED
+  APPLICATION_INTERVIEW
+  APPLICATION_HIRED
+}
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId String
+
+  title String
+
+  message String
+
+  type NotificationType
+
+  isRead Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

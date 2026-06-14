@@ -8835,3 +8835,555 @@ Planned Features:
 
 Successfully implemented dedicated analytics APIs for interview performance and application tracking. This completes the Dashboard & Analytics phase and provides the frontend with comprehensive analytics data for charts, dashboards, progress tracking, and performance insights.
 
+# Phase 5 – Day 4: Notification System (Database Notifications)
+
+## Overview
+
+Implemented a centralized Notification System for TalentBridge to improve communication between students and recruiters.
+
+Before this update, important recruitment events such as applications, withdrawals, shortlisting, interview progression, and hiring occurred without notifying the affected users.
+
+With this implementation, TalentBridge now automatically generates notifications for key recruitment actions and stores them in the database. This lays the foundation for future real-time notifications using Socket.io.
+
+---
+
+## Features Implemented
+
+### 1. Notification System Architecture
+
+Introduced a centralized notification system responsible for tracking important platform events and notifying the appropriate users.
+
+**Supported Users**
+
+* Students
+* Recruiters
+
+---
+
+### 2. Notification Model
+
+Added a `Notification` entity to the database.
+
+#### Fields
+
+| Field     | Description                    |
+| --------- | ------------------------------ |
+| id        | Unique notification identifier |
+| userId    | Target user                    |
+| title     | Notification title             |
+| message   | Notification message           |
+| type      | Notification category          |
+| isRead    | Read status                    |
+| createdAt | Creation timestamp             |
+
+#### Notification Status
+
+* Unread
+* Read
+
+---
+
+### 3. Notification Types
+
+Implemented categorized notification types for better organization and filtering.
+
+```javascript
+APPLICATION_APPLIED
+APPLICATION_WITHDRAWN
+APPLICATION_SHORTLISTED
+APPLICATION_REJECTED
+APPLICATION_INTERVIEW
+APPLICATION_HIRED
+```
+
+---
+
+### 4. Notification Service
+
+Created a centralized notification service:
+
+```bash
+services/notification.service.js
+```
+
+#### Core Function
+
+```javascript
+createNotification(
+  userId,
+  title,
+  message,
+  type
+)
+```
+
+#### Benefits
+
+* Reusable
+* Clean architecture
+* Easy maintenance
+* Scalable design
+
+---
+
+### 5. Application Submission Notifications
+
+Integrated notifications into:
+
+```javascript
+applyToJob()
+```
+
+#### Workflow
+
+```text
+Student Applies
+      ↓
+Application Created
+      ↓
+Recruiter Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+New Application
+```
+
+**Message**
+
+```text
+Aman applied for Backend Developer
+```
+
+---
+
+### 6. Application Withdrawal Notifications
+
+Integrated notifications into:
+
+```javascript
+withdrawApplication()
+```
+
+#### Workflow
+
+```text
+Student Withdraws Application
+           ↓
+Recruiter Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+Application Withdrawn
+```
+
+**Message**
+
+```text
+Aman withdrew application for Backend Developer
+```
+
+---
+
+### 7. Candidate Shortlisting Notifications
+
+Integrated notifications into:
+
+```javascript
+updateApplicationStatus()
+```
+
+#### Workflow
+
+```text
+Recruiter Shortlists Candidate
+             ↓
+Student Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+Congratulations 🎉
+```
+
+**Message**
+
+```text
+You have been shortlisted for Backend Developer
+```
+
+---
+
+### 8. Interview Round Notifications
+
+Implemented notifications for interview-stage progression.
+
+#### Workflow
+
+```text
+Recruiter Moves Candidate To Interview
+                 ↓
+Student Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+Interview Round
+```
+
+**Message**
+
+```text
+You have advanced to the interview stage
+```
+
+---
+
+### 9. Rejection Notifications
+
+Implemented notifications for rejected applications.
+
+#### Workflow
+
+```text
+Recruiter Rejects Candidate
+            ↓
+Student Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+Application Update
+```
+
+**Message**
+
+```text
+Your application was not shortlisted
+```
+
+---
+
+### 10. Hiring Notifications
+
+Implemented notifications for successful hiring decisions.
+
+#### Workflow
+
+```text
+Recruiter Hires Candidate
+           ↓
+Student Notification Created
+```
+
+#### Example
+
+**Title**
+
+```text
+Congratulations 🎉
+```
+
+**Message**
+
+```text
+You have been selected for the role
+```
+
+---
+
+## Notification Flow
+
+### Student Actions
+
+```text
+Apply
+  ↓
+Recruiter Notification
+
+Withdraw
+  ↓
+Recruiter Notification
+```
+
+### Recruiter Actions
+
+```text
+Shortlist
+     ↓
+Student Notification
+
+Interview
+     ↓
+Student Notification
+
+Reject
+     ↓
+Student Notification
+
+Hire
+     ↓
+Student Notification
+```
+
+---
+
+## Database Workflow
+
+```text
+User Action
+      ↓
+Controller
+      ↓
+createNotification()
+      ↓
+Notification Table
+      ↓
+Notification Stored
+```
+
+---
+
+## Testing Completed
+
+| Test Case                | Status   |
+| ------------------------ | -------- |
+| Apply Notification       | ✅ Passed |
+| Withdraw Notification    | ✅ Passed |
+| Shortlist Notification   | ✅ Passed |
+| Interview Notification   | ✅ Passed |
+| Reject Notification      | ✅ Passed |
+| Hire Notification        | ✅ Passed |
+| Notification Persistence | ✅ Passed |
+| User Mapping Validation  | ✅ Passed |
+| Database Verification    | ✅ Passed |
+
+---
+
+## Key Learnings
+
+* Event-driven backend design
+* Notification architecture
+* Reusable service-layer patterns
+* User-targeted communication systems
+* Database event tracking
+* Preparing systems for real-time notification delivery
+
+# Phase 5 – Day 5: Notification APIs
+
+## Overview
+
+Today, I completed the Notification Management layer of TalentBridge.
+
+Before this update, notifications were successfully generated and stored in the database, but users had no way to access or manage them.
+
+With today's implementation, students and recruiters can now:
+
+* View their notifications
+* Mark individual notifications as read
+* Mark all notifications as read
+
+This completes the database-driven notification system and establishes the backend foundation for future real-time notifications using Socket.io.
+
+---
+
+## Features Implemented
+
+### 1. Get Notifications API
+
+Implemented:
+
+```http
+GET /api/notifications
+```
+
+#### Purpose
+
+Fetches all notifications belonging to the authenticated user.
+
+#### Response Includes
+
+* Notification ID
+* Title
+* Message
+* Type
+* Read Status (`isRead`)
+* Created Date
+
+#### Sorting
+
+Notifications are returned in reverse chronological order:
+
+```text
+Latest First
+      ↓
+Oldest Last
+```
+
+This ensures users immediately see the most recent activity.
+
+---
+
+### 2. Mark Single Notification as Read
+
+Implemented:
+
+```http
+PATCH /api/notifications/:id/read
+```
+
+#### Purpose
+
+Allows users to mark a specific notification as read.
+
+#### Workflow
+
+```text
+Notification
+      ↓
+Select Notification
+      ↓
+Update isRead = true
+```
+
+#### Result
+
+```text
+Unread Notification
+        ↓
+Read Notification
+```
+
+---
+
+### 3. Mark All Notifications as Read
+
+Implemented:
+
+```http
+PATCH /api/notifications/read-all
+```
+
+#### Purpose
+
+Allows users to mark all unread notifications as read with a single action.
+
+#### Workflow
+
+```text
+User
+   ↓
+Read All
+   ↓
+Update All User Notifications
+   ↓
+isRead = true
+```
+
+---
+
+## Notification Management Flow
+
+```text
+Event Occurs
+      ↓
+Notification Created
+      ↓
+Stored In Database
+      ↓
+User Fetches Notifications
+      ↓
+Mark Read
+      ↓
+Notification Updated
+```
+
+---
+
+## APIs Completed Today
+
+### Fetch Notifications
+
+```http
+GET /api/notifications
+```
+
+### Mark Single Notification Read
+
+```http
+PATCH /api/notifications/:id/read
+```
+
+### Mark All Notifications Read
+
+```http
+PATCH /api/notifications/read-all
+```
+
+---
+
+## Testing Completed
+
+| Test Case                 | Status   |
+| ------------------------- | -------- |
+| Notification Retrieval    | ✅ Passed |
+| Sorting Validation        | ✅ Passed |
+| User Ownership Validation | ✅ Passed |
+| Single Read Update        | ✅ Passed |
+| Bulk Read Update          | ✅ Passed |
+| Database Verification     | ✅ Passed |
+| Response Verification     | ✅ Passed |
+
+---
+
+## Key Learnings
+
+* Notification management architecture
+* Read/unread state tracking
+* Bulk database updates
+* User-specific data retrieval
+* Notification lifecycle management
+* Backend support for notification centers
+
+---
+
+## Current Notification System Capabilities
+
+### Notification Creation
+
+* Application Submitted
+* Application Withdrawn
+* Candidate Shortlisted
+* Interview Stage Progression
+* Candidate Rejected
+* Candidate Hired
+
+### Notification Management
+
+* Fetch Notifications
+* Mark Single Notification Read
+* Mark All Notifications Read
+
+### Future Enhancements
+
+* Real-time notifications with Socket.io
+* Notification badges and unread counts
+* Push notifications
+* Email notifications
+* Notification preferences and filtering

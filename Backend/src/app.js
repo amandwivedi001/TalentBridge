@@ -22,6 +22,7 @@ import applicationRoutes from "./routes/application.route.js";
 import matchRoutes from "./routes/match.route.js";
 import interviewRoutes from "./routes/interview.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 
 
 app.use("/api/health", healthRoutes);
@@ -35,6 +36,7 @@ app.use("/api/applications",applicationRoutes);
 app.use("/api/matches",matchRoutes);
 app.use("/api/interviews",interviewRoutes);
 app.use("/api/dashboard",dashboardRoutes);
+app.use("/api/notifications",notificationRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

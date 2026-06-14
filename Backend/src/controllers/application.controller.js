@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { generateCandidateMatchForApplication } from "../services/CandidateMatch.service.js";
+import { createNotification } from "../services/notification.service.js";
 
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -13,6 +14,14 @@ export const applyToJob = asyncHandler(async (req, res) => {
     const job = await prisma.job.findUnique({
         where: {
             id: jobId,
+        },
+
+        include: {
+            recruiter: {
+                select: {
+                    userId: true,
+                },
+            },
         },
     });
 
@@ -62,6 +71,13 @@ export const applyToJob = asyncHandler(async (req, res) => {
 
         await generateCandidateMatchForApplication(
             application.id
+        );
+
+        await createNotification(
+            job.recruiter.userId,
+            "New Application",
+            `${req.user.name} applied for ${job.title}`,
+            "APPLICATION_APPLIED"
         );
 
         return res.status(201).json(
@@ -188,6 +204,25 @@ export const withdrawApplication =
 
         const { jobId } = req.params;
 
+        const job =
+            await prisma.job.findUnique({
+                where: {
+                    id: jobId,
+                },
+
+                include: {
+                    recruiter: {
+                        select: {
+                            userId: true,
+                        },
+                    },
+                },
+            });
+
+        if (!job) {
+            throw new ApiError(404, "Job not found");
+        }
+
         const studentId =
             req.user.studentProfile.id;
 
@@ -228,6 +263,13 @@ export const withdrawApplication =
                     status: "WITHDRAWN",
                 },
             });
+
+        await createNotification(
+            job.recruiter.userId,
+            "Application Withdrawn",
+            `${req.user.name} withdrew application for ${job.title}`,
+            "APPLICATION_WITHDRAWN"
+        );
 
         return res.status(200).json(
             new ApiResponse(
@@ -271,6 +313,7 @@ export const updateApplicationStatus =
                 },
 
                 include: {
+                    student: true,
                     job: true,
                 },
             });
@@ -302,6 +345,13 @@ export const updateApplicationStatus =
             );
         }
 
+        if (application.status === status) {
+            throw new ApiError(
+                400,
+                `Application is already ${status}`
+            );
+        }
+
         const updatedApplication =
             await prisma.application.update({
                 where: {
@@ -312,6 +362,50 @@ export const updateApplicationStatus =
                     status,
                 },
             });
+
+        const studentUserId =
+            application.student.userId;
+
+        switch (status) {
+            case "SHORTLISTED":
+                await createNotification(
+                    studentUserId,
+                    "Congratulations 🎉",
+                    `You have been shortlisted for ${application.job.title}`,
+                    "APPLICATION_SHORTLISTED"
+                );
+                break;
+
+            case "INTERVIEW":
+                await createNotification(
+                    studentUserId,
+                    "Interview Round",
+                    `You have moved to the interview stage for ${application.job.title}`,
+                    "APPLICATION_INTERVIEW"
+                );
+                break;
+
+            case "HIRED":
+                await createNotification(
+                    studentUserId,
+                    "Congratulations 🎉",
+                    `You have been selected for ${application.job.title}`,
+                    "APPLICATION_HIRED"
+                );
+                break;
+
+            case "REJECTED":
+                await createNotification(
+                    studentUserId,
+                    "Application Update",
+                    `Your application for ${application.job.title} was not shortlisted`,
+                    "APPLICATION_REJECTED"
+                );
+                break;
+
+            default:
+                break;
+        }
 
         return res.status(200).json(
             new ApiResponse(
@@ -396,7 +490,7 @@ export const getApplicationPipeline = asyncHandler(async (req, res) => {
 
             reasoning:
                 application.candidateMatch?.reasoning || null,
-            
+
             updatedAt: application.updatedAt,
         };
 
@@ -446,68 +540,68 @@ export const getApplicationPipeline = asyncHandler(async (req, res) => {
 })
 
 export const getApplicationStats =
-  asyncHandler(async (req, res) => {
-    const studentId =
-      req.user.studentProfile.id;
+    asyncHandler(async (req, res) => {
+        const studentId =
+            req.user.studentProfile.id;
 
-    const applications =
-      await prisma.application.findMany({
-        where: {
-          studentId,
-        },
+        const applications =
+            await prisma.application.findMany({
+                where: {
+                    studentId,
+                },
 
-        select: {
-          status: true,
-        },
-      });
+                select: {
+                    status: true,
+                },
+            });
 
-    const stats = {
-      total: applications.length,
+        const stats = {
+            total: applications.length,
 
-      applied: 0,
-      shortlisted: 0,
-      interview: 0,
-      hired: 0,
-      rejected: 0,
-      withdrawn: 0,
-    };
+            applied: 0,
+            shortlisted: 0,
+            interview: 0,
+            hired: 0,
+            rejected: 0,
+            withdrawn: 0,
+        };
 
-    for (const application of applications) {
-      switch (application.status) {
-        case "APPLIED":
-          stats.applied++;
-          break;
+        for (const application of applications) {
+            switch (application.status) {
+                case "APPLIED":
+                    stats.applied++;
+                    break;
 
-        case "SHORTLISTED":
-          stats.shortlisted++;
-          break;
+                case "SHORTLISTED":
+                    stats.shortlisted++;
+                    break;
 
-        case "INTERVIEW":
-          stats.interview++;
-          break;
+                case "INTERVIEW":
+                    stats.interview++;
+                    break;
 
-        case "HIRED":
-          stats.hired++;
-          break;
+                case "HIRED":
+                    stats.hired++;
+                    break;
 
-        case "REJECTED":
-          stats.rejected++;
-          break;
+                case "REJECTED":
+                    stats.rejected++;
+                    break;
 
-        case "WITHDRAWN":
-          stats.withdrawn++;
-          break;
+                case "WITHDRAWN":
+                    stats.withdrawn++;
+                    break;
 
-        default:
-          break;
-      }
-    }
+                default:
+                    break;
+            }
+        }
 
-    return res.status(200).json(
-      new ApiResponse(
-        200,
-        stats,
-        "Application analytics fetched successfully"
-      )
-    );
-  });
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                stats,
+                "Application analytics fetched successfully"
+            )
+        );
+    });
