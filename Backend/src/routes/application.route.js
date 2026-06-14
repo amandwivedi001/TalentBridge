@@ -7,6 +7,7 @@ import {
   withdrawApplication,
   updateApplicationStatus,
   getApplicationPipeline,
+  getApplicationStats,
 } from "../controllers/application.controller.js";
 
 import {
@@ -56,6 +57,13 @@ router.get(
   protect,
   allowRoles("RECRUITER"),
   getApplicationPipeline
+);
+
+router.get(
+  "/stats",
+  protect,
+  allowRoles("STUDENT"),
+  getApplicationStats
 );
 
 export default router;

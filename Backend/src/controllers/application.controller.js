@@ -444,3 +444,70 @@ export const getApplicationPipeline = asyncHandler(async (req, res) => {
         )
     );
 })
+
+export const getApplicationStats =
+  asyncHandler(async (req, res) => {
+    const studentId =
+      req.user.studentProfile.id;
+
+    const applications =
+      await prisma.application.findMany({
+        where: {
+          studentId,
+        },
+
+        select: {
+          status: true,
+        },
+      });
+
+    const stats = {
+      total: applications.length,
+
+      applied: 0,
+      shortlisted: 0,
+      interview: 0,
+      hired: 0,
+      rejected: 0,
+      withdrawn: 0,
+    };
+
+    for (const application of applications) {
+      switch (application.status) {
+        case "APPLIED":
+          stats.applied++;
+          break;
+
+        case "SHORTLISTED":
+          stats.shortlisted++;
+          break;
+
+        case "INTERVIEW":
+          stats.interview++;
+          break;
+
+        case "HIRED":
+          stats.hired++;
+          break;
+
+        case "REJECTED":
+          stats.rejected++;
+          break;
+
+        case "WITHDRAWN":
+          stats.withdrawn++;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        stats,
+        "Application analytics fetched successfully"
+      )
+    );
+  });

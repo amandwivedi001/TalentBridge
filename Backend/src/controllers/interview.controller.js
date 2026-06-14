@@ -497,3 +497,92 @@ export const getInterviewDetails =
       )
     );
   });
+
+export const getInterviewStats =
+  asyncHandler(async (req, res) => {
+    const studentId =
+      req.user.studentProfile.id;
+
+    const interviews =
+      await prisma.interviewSession.findMany({
+        where: {
+          studentId,
+        },
+
+        select: {
+          status: true,
+          overallScore: true,
+        },
+      });
+
+    const totalInterviews =
+      interviews.length;
+
+    const completedInterviews =
+      interviews.filter(
+        (interview) =>
+          interview.status ===
+          "COMPLETED"
+      );
+
+    const completedCount =
+      completedInterviews.length;
+
+    const totalScore =
+      completedInterviews.reduce(
+        (sum, interview) =>
+          sum +
+          (interview.overallScore || 0),
+        0
+      );
+
+    const averageScore =
+      completedCount > 0
+        ? Math.round(
+          totalScore /
+          completedCount
+        )
+        : 0;
+
+    const bestScore =
+      completedCount > 0
+        ? Math.max(
+          ...completedInterviews.map(
+            (interview) =>
+              interview.overallScore || 0
+          )
+        )
+        : 0;
+
+    const worstScore =
+      completedCount > 0
+        ? Math.min(
+          ...completedInterviews.map(
+            (interview) =>
+              interview.overallScore || 0
+          )
+        )
+        : 0;
+
+      const latestInterviewScore =
+            completedCount > 0
+              ? completedInterviews[
+                completedInterviews.length - 1
+              ]?.overallScore || 0
+              : 0
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          totalInterviews,
+          completedInterviews:
+            completedCount,
+          averageScore,
+          bestScore,
+          worstScore,
+          latestInterviewScore,
+        },
+        "Interview analytics fetched successfully"
+      )
+    );
+  });
