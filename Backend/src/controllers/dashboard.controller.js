@@ -181,3 +181,121 @@ export const getStudentDashboard =
             )
         );
     });
+
+
+export const getRecruiterDashboard =
+    asyncHandler(async (req, res) => {
+        const recruiterId =
+            req.user.recruiterProfile.id;
+
+        const [jobs, applications] =
+            await Promise.all([
+                prisma.job.findMany({
+                    where: {
+                        recruiterId,
+                    },
+
+                    select: {
+                        id: true,
+                        isActive: true,
+                    },
+                }),
+
+                prisma.application.findMany({
+                    where: {
+                        job: {
+                            recruiterId,
+                        },
+                    },
+
+                    select: {
+                        status: true,
+                        studentId: true,
+                    },
+                }),
+            ]);
+
+        const jobStats = {
+            total: jobs.length,
+
+            active:
+                jobs.filter(
+                    (job) => job.isActive
+                ).length,
+
+            inactive:
+                jobs.filter(
+                    (job) => !job.isActive
+                ).length,
+        };
+
+        const applicationStats = {
+            total: applications.length,
+
+            applied: 0,
+            shortlisted: 0,
+            interview: 0,
+            hired: 0,
+            rejected: 0,
+            withdrawn: 0,
+        };
+
+        for (const application of applications) {
+            switch (application.status) {
+                case "APPLIED":
+                    applicationStats.applied++;
+                    break;
+
+                case "SHORTLISTED":
+                    applicationStats.shortlisted++;
+                    break;
+
+                case "INTERVIEW":
+                    applicationStats.interview++;
+                    break;
+
+                case "HIRED":
+                    applicationStats.hired++;
+                    break;
+
+                case "REJECTED":
+                    applicationStats.rejected++;
+                    break;
+
+                case "WITHDRAWN":
+                    applicationStats.withdrawn++;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        const uniqueCandidates =
+            new Set(
+                applications.map(
+                    (application) =>
+                        application.studentId
+                )
+            );
+
+        const candidateStats = {
+            total: uniqueCandidates.size,
+        };
+
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                {
+                    jobs: jobStats,
+
+                    applications:
+                        applicationStats,
+
+                    candidates:
+                        candidateStats,
+                },
+                "Recruiter dashboard fetched successfully"
+            )
+        );
+    });
