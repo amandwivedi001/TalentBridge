@@ -9387,3 +9387,325 @@ PATCH /api/notifications/read-all
 * Push notifications
 * Email notifications
 * Notification preferences and filtering
+
+# Phase 5 – Day 6: Real-Time Notifications (Socket.io)
+
+## Overview
+
+Today, I implemented the **real-time notification system** for TalentBridge using **Socket.io**.
+
+Previously, notifications were stored in the database and could only be viewed after fetching them through notification APIs.
+
+With this update, notifications are now delivered instantly to users without requiring a page refresh, bringing TalentBridge closer to the experience provided by modern recruitment platforms such as LinkedIn, Internshala, and Naukri.
+
+---
+
+# Features Implemented
+
+## 1. Socket.io Integration
+
+Integrated **Socket.io** into the backend server to enable real-time communication between the backend and connected clients.
+
+### Benefits
+
+* Instant updates
+* No page refresh required
+* Improved user experience
+* Event-driven communication
+
+---
+
+## 2. User-Based Socket Rooms
+
+Implemented room-based notification delivery to ensure notifications are sent only to the intended recipient.
+
+### Workflow
+
+```text
+User Login
+    ↓
+Socket Connected
+    ↓
+register(userId)
+    ↓
+Join Room
+user:{userId}
+```
+
+### Example
+
+```text
+user:cmq0abc123
+```
+
+Each authenticated user joins a unique socket room associated with their account.
+
+---
+
+## 3. Notification Emitter
+
+Created a dedicated notification emitter:
+
+```text
+socket/notification.js
+```
+
+### Purpose
+
+Centralized real-time notification delivery across the application.
+
+### Workflow
+
+```text
+Notification Created
+        ↓
+emitNotification()
+        ↓
+Socket Emit
+        ↓
+Target User Room
+```
+
+---
+
+## 4. Notification Service Upgrade
+
+Enhanced the notification service to support real-time event emission.
+
+### Previous Workflow
+
+```text
+Create Notification
+       ↓
+Store In Database
+```
+
+### New Workflow
+
+```text
+Create Notification
+       ↓
+Store In Database
+       ↓
+Emit Real-Time Event
+```
+
+---
+
+## 5. New Socket Event
+
+### Event Name
+
+```text
+new-notification
+```
+
+### Payload
+
+```json
+{
+  "id": "...",
+  "title": "Congratulations 🎉",
+  "message": "You have been shortlisted",
+  "isRead": false
+}
+```
+
+---
+
+## 6. Real-Time Notification Flow
+
+### Student Applies
+
+```text
+Student Applies
+       ↓
+Notification Created
+       ↓
+Recruiter Receives Instantly
+```
+
+### Student Withdraws Application
+
+```text
+Student Withdraws
+       ↓
+Notification Created
+       ↓
+Recruiter Receives Instantly
+```
+
+### Recruiter Shortlists Candidate
+
+```text
+Recruiter Shortlists
+         ↓
+Notification Created
+         ↓
+Student Receives Instantly
+```
+
+### Recruiter Moves Candidate to Interview
+
+```text
+Recruiter Updates Status
+          ↓
+Notification Created
+          ↓
+Student Receives Instantly
+```
+
+### Recruiter Rejects Candidate
+
+```text
+Recruiter Rejects
+         ↓
+Notification Created
+         ↓
+Student Receives Instantly
+```
+
+### Recruiter Hires Candidate
+
+```text
+Recruiter Hires
+        ↓
+Notification Created
+        ↓
+Student Receives Instantly
+```
+
+---
+
+# Architecture
+
+```text
+Controller
+     ↓
+createNotification()
+     ↓
+Database Storage
+     ↓
+emitNotification()
+     ↓
+Socket Room
+     ↓
+Connected User
+```
+
+---
+
+# Components Implemented
+
+## Server Layer
+
+* Socket.io Server Setup
+* Connection Handling
+* Room Registration
+* Disconnection Handling
+
+## Notification Layer
+
+* Notification Emitter
+* Room-Based Delivery
+* Event Broadcasting
+
+## Service Layer
+
+* Notification Creation
+* Database Persistence
+* Real-Time Delivery
+
+---
+
+# Testing Status
+
+| Feature                  | Status      |
+| ------------------------ | ----------- |
+| Notification Persistence | ✅ Passed    |
+| Socket Room Registration | ✅ Passed    |
+| Notification Emission    | ✅ Passed    |
+| Event Delivery Logic     | ✅ Passed    |
+| Architecture Validation  | ✅ Passed    |
+| Multi-Session Support    | ✅ Supported |
+
+---
+
+# Key Learnings
+
+* Socket.io architecture
+* Real-time event systems
+* Room-based communication
+* Event-driven backend design
+* Notification broadcasting
+* Production-style realtime workflows
+
+---
+
+# Current Progress
+
+## Project Phases
+
+| Phase   | Status         |
+| ------- | -------------- |
+| Phase 1 | ✅ Completed    |
+| Phase 2 | ✅ Completed    |
+| Phase 3 | ✅ Completed    |
+| Phase 4 | ✅ Completed    |
+| Phase 5 | 🟡 Final Stage |
+
+---
+
+## Dashboard & Analytics Progress
+
+| Module                    | Status |
+| ------------------------- | ------ |
+| Student Dashboard API     | ✅      |
+| Recruiter Dashboard API   | ✅      |
+| Interview Analytics API   | ✅      |
+| Application Analytics API | ✅      |
+| Notification System       | ✅      |
+| Notification APIs         | ✅      |
+| Realtime Notifications    | ✅      |
+
+---
+
+# TalentBridge Backend Status
+
+## Core Features
+
+| Feature                | Status |
+| ---------------------- | ------ |
+| Authentication         | ✅      |
+| Role Management        | ✅      |
+| Resume Analysis        | ✅      |
+| Job Management         | ✅      |
+| Applications           | ✅      |
+| AI Candidate Matching  | ✅      |
+| Candidate Ranking      | ✅      |
+| Mock Interviews        | ✅      |
+| Interview Reports      | ✅      |
+| Dashboards             | ✅      |
+| Analytics              | ✅      |
+| Notifications          | ✅      |
+| Realtime Notifications | ✅      |
+
+---
+
+# Backend Completion Status
+
+| Module                 | Status |
+| ---------------------- | ------ |
+| Authentication         | ✅      |
+| Profiles               | ✅      |
+| Resume System          | ✅      |
+| AI Resume Analysis     | ✅      |
+| Jobs                   | ✅      |
+| Applications           | ✅      |
+| Candidate Matching     | ✅      |
+| Ranking Engine         | ✅      |
+| Mock Interview         | ✅      |
+| Dashboards             | ✅      |
+| Analytics              | ✅      |
+| Notifications          | ✅      |
+| Realtime Notifications | ✅      |
