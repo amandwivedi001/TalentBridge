@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* Reset */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Variables */
+
+:root {
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+
+  --radius: 16px;
+
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* Body */
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--bg-color);
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+/* Images */
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Buttons */
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Inputs */
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
