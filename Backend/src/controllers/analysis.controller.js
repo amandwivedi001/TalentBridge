@@ -46,7 +46,7 @@ export const analyzeMyResume = asyncHandler(async (req, res) => {
   const buffer = Buffer.from(arrayBuffer);
 
   const resumeText = await extractTextFromPdf(buffer);
-
+  
 
   const analysis = await analyzeResume(
     resumeText

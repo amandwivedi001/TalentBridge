@@ -1,11 +1,5 @@
 const users = new Map();
 
-/*
-users = {
-  userId => Set(socketIds)
-}
-*/
-
 export const addUserSocket = (userId, socketId) => {
   if (!users.has(userId)) {
     users.set(userId, new Set());
