@@ -90,16 +90,29 @@ export const login = asyncHandler(async (req, res) => {
 
   const token = generateToken(safeUser);
 
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        user: safeUser,
-        token,
-      },
-      "Login successful"
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  };
+
+  return res
+    .cookie(
+      "accessToken",
+      token,
+      cookieOptions
     )
-  );
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: safeUser,
+        },
+        "Login successful"
+      )
+    );
 });
 
 export const getMe = asyncHandler(async (req, res) => {
@@ -107,3 +120,29 @@ export const getMe = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
 });
+
+export const logout =
+  asyncHandler(
+    async (req, res) => {
+
+      return res
+        .clearCookie(
+          "accessToken",
+          {
+            httpOnly: true,
+            secure:
+              process.env.NODE_ENV ===
+              "production",
+            sameSite: "lax",
+          }
+        )
+        .status(200)
+        .json(
+          new ApiResponse(
+            200,
+            null,
+            "Logged out successfully"
+          )
+        );
+    }
+  );
