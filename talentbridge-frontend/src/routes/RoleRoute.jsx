@@ -1,22 +1,32 @@
 import { Navigate } from "react-router-dom";
 
-const RoleRoute = ({
+function RoleRoute({
+  allowedRole,
   children,
-  role,
-}) => {
+}) {
+  const user = null;
 
-  const userRole =
-    "STUDENT";
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
 
   if (
-    role !== userRole
+    user.role !== allowedRole
   ) {
     return (
-      <Navigate to="/" />
+      <Navigate
+        to="/"
+        replace
+      />
     );
   }
 
   return children;
-};
+}
 
 export default RoleRoute;
