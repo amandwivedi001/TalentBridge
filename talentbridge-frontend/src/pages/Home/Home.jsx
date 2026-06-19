@@ -1,10 +1,23 @@
 import { Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function Home() {
-  // temporary
+  const {
+    user,
+    isAuthenticated,
+    loading,
+    authInitialized,
+  } = useSelector(
+    (state) => state.auth
+  );
 
-  const isAuthenticated = false;
-  const user = null;
+  if (!authInitialized) {
+  return (
+    <div>
+      Loading...
+    </div>
+  );
+}
 
   if (!isAuthenticated) {
     return (
@@ -15,7 +28,9 @@ function Home() {
     );
   }
 
-  if (user?.role === "STUDENT") {
+  if (
+    user.role === "STUDENT"
+  ) {
     return (
       <Navigate
         to="/student/dashboard"
@@ -24,7 +39,9 @@ function Home() {
     );
   }
 
-  if (user?.role === "RECRUITER") {
+  if (
+    user.role === "RECRUITER"
+  ) {
     return (
       <Navigate
         to="/recruiter/dashboard"

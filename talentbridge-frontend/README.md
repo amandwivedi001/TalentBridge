@@ -763,3 +763,466 @@ Authentication UI & Design System
 # Summary
 
 Phase 6 Day 2 focused on building a polished and scalable authentication experience for TalentBridge. The foundation now includes professional branding, reusable authentication components, responsive layouts, and a modern SaaS-inspired design system that will be reused throughout the platform.
+
+
+# Phase 6 – Day 3: Authentication Integration & Session Management
+
+## Overview
+
+Today, I integrated the Authentication UI with the TalentBridge backend and implemented a complete production-grade authentication system using **HTTP-only cookies**.
+
+The primary objective was to build a secure, scalable, and maintainable authentication architecture featuring:
+
+* Backend-integrated authentication
+* Session persistence
+* Protected routes
+* Role-based access control
+* Redux authentication state management
+
+This milestone transformed the frontend from static authentication screens into a fully functional application connected to the backend.
+
+---
+
+# Authentication Architecture Upgrade
+
+## Previous State
+
+* Authentication UI only
+* No backend integration
+* No authentication state
+* No session management
+* No route protection
+
+## Current State
+
+```text
+Frontend
+    ↓
+Auth API
+    ↓
+HTTP-Only Cookie
+    ↓
+GET /auth/me
+    ↓
+Redux Store
+    ↓
+Protected Application
+```
+
+---
+
+# Backend Authentication Migration
+
+## Cookie-Based Authentication
+
+Migrated authentication from frontend-managed tokens to **HTTP-only cookie-based sessions**.
+
+### Benefits
+
+* Improved security
+* Production-standard implementation
+* No token storage in localStorage
+* Automatic session handling
+* Reduced XSS attack surface
+
+---
+
+# Login Flow
+
+```text
+Login
+    ↓
+Backend Validates User
+    ↓
+HTTP-Only Cookie Created
+    ↓
+User Data Returned
+    ↓
+Redux Updated
+    ↓
+Dashboard Redirect
+```
+
+---
+
+# Logout Flow
+
+Implemented:
+
+```http
+POST /auth/logout
+```
+
+### Workflow
+
+```text
+Logout
+    ↓
+Cookie Cleared
+    ↓
+Session Removed
+    ↓
+Redux Cleared
+    ↓
+Redirect Login
+```
+
+---
+
+# Authentication Service Layer
+
+Created:
+
+```text
+services/auth.service.js
+```
+
+## Functions
+
+```javascript
+registerUser()
+loginUser()
+logoutUser()
+getCurrentUser()
+```
+
+## Purpose
+
+* Centralized authentication API calls
+* Reusable service layer
+* Cleaner components
+* Better code organization
+
+---
+
+# Redux Authentication State
+
+Updated the authentication slice to manage application-wide authentication state.
+
+## State Structure
+
+```javascript
+{
+  user,
+  isAuthenticated,
+  loading,
+  authInitialized
+}
+```
+
+## Actions
+
+### setUser
+
+* Stores authenticated user
+* Sets authentication status
+
+### clearUser
+
+* Removes user data
+* Resets authentication state
+
+### setLoading
+
+* Handles authentication loading states
+
+### setAuthInitialized
+
+* Tracks authentication initialization
+* Prevents route flickering
+
+---
+
+# Application Initialization System
+
+Created:
+
+```text
+app/AppInitializer.jsx
+```
+
+## Purpose
+
+* Restore user session on refresh
+* Initialize authentication state
+* Sync Redux with backend session
+
+### Workflow
+
+#### Active Session
+
+```text
+Application Loads
+        ↓
+GET /auth/me
+        ↓
+User Found
+        ↓
+Redux Updated
+```
+
+#### No Session
+
+```text
+Application Loads
+        ↓
+GET /auth/me
+        ↓
+No Active Session
+        ↓
+Clear User State
+```
+
+---
+
+# Session Persistence
+
+Implemented a production-grade session restoration system.
+
+## Before
+
+```text
+Login
+    ↓
+Refresh
+    ↓
+User Logged Out
+```
+
+## After
+
+```text
+Login
+    ↓
+Cookie Stored
+    ↓
+Refresh
+    ↓
+AppInitializer
+    ↓
+GET /auth/me
+    ↓
+User Restored
+```
+
+---
+
+# Protected Routes
+
+Implemented:
+
+```text
+ProtectedRoute.jsx
+```
+
+## Purpose
+
+Restrict access to authenticated users.
+
+### Workflow
+
+#### Authenticated
+
+```text
+Authenticated
+      ↓
+Allow Access
+```
+
+#### Not Authenticated
+
+```text
+Not Authenticated
+      ↓
+Redirect Login
+```
+
+### Additional Enhancement
+
+Uses:
+
+```javascript
+authInitialized
+```
+
+to prevent UI flickering while session restoration is in progress.
+
+---
+
+# Role-Based Routing
+
+Implemented:
+
+```text
+RoleRoute.jsx
+```
+
+## Purpose
+
+Restrict application sections based on user roles.
+
+### Student Access
+
+Allowed:
+
+* Student Dashboard
+* Resume Management
+* Applications
+* Interviews
+
+### Recruiter Access
+
+Allowed:
+
+* Recruiter Dashboard
+* Job Management
+* Candidate Management
+* Hiring Pipeline
+
+### Unauthorized Access
+
+```text
+Invalid Role
+      ↓
+Redirect Safe Route
+```
+
+---
+
+# Login Integration
+
+Connected login UI to backend authentication APIs.
+
+## Workflow
+
+```text
+Submit Login Form
+       ↓
+POST /auth/login
+       ↓
+Cookie Created
+       ↓
+GET /auth/me
+       ↓
+Redux Updated
+       ↓
+Redirect Dashboard
+```
+
+---
+
+# Register Integration
+
+Connected registration UI to backend.
+
+## Workflow
+
+```text
+Submit Register Form
+       ↓
+POST /auth/register
+       ↓
+Success Toast
+       ↓
+Navigate Login
+```
+
+---
+
+# Logout Integration
+
+Connected logout functionality with backend session management.
+
+## Workflow
+
+```text
+Logout Button
+       ↓
+POST /auth/logout
+       ↓
+Clear Redux State
+       ↓
+Navigate Login
+```
+
+---
+
+# Testing Results
+
+| Feature                  | Status   |
+| ------------------------ | -------- |
+| User Registration        | ✅ Passed |
+| Login & Cookie Creation  | ✅ Passed |
+| Session Restoration      | ✅ Passed |
+| Protected Routes         | ✅ Passed |
+| Role-Based Access        | ✅ Passed |
+| Logout & Session Cleanup | ✅ Passed |
+
+---
+
+# Architecture Progress
+
+## Frontend Foundation
+
+```text
+Project Structure       ✅
+Theme System            ✅
+Redux Setup             ✅
+Axios Setup             ✅
+Routing Setup           ✅
+```
+
+## Authentication System
+
+```text
+Auth UI                 ✅
+Register Integration    ✅
+Login Integration       ✅
+Cookie Authentication   ✅
+Session Persistence     ✅
+Protected Routes        ✅
+Role Routes             ✅
+Logout                  ✅
+```
+
+---
+
+# Key Learnings
+
+* Cookie-based authentication
+* Session persistence strategies
+* Protected route implementation
+* Role-based authorization
+* Redux authentication management
+* Application initialization patterns
+* Production-grade login workflows
+* Secure frontend-backend authentication integration
+
+---
+
+# Current Progress
+
+### Phase 6 – Day 1 ✅
+
+Frontend Foundation
+
+### Phase 6 – Day 2 ✅
+
+Authentication UI
+
+### Phase 6 – Day 3 ✅
+
+Authentication Integration & Session Management
+
+---
+
+## Next Steps
+
+* Student Dashboard Integration
+* Recruiter Dashboard Integration
+* Profile Management
+* Resume Builder
+* Job Management System
+* Candidate Application Flow
+* Interview Scheduling
+* Real-Time Notifications
