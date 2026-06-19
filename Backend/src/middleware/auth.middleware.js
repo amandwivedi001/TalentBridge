@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { verifyToken } from "../utils/jwt.js";
 
 export const protect = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.accessToken||req.headers.authorization;
+  const token = req.cookies.accessToken;
 
   if (!token) {
     throw new ApiError(401, "Access denied. No token provided");
