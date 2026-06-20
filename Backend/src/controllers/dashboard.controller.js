@@ -130,6 +130,25 @@ export const getStudentDashboard =
                 )
                 : 0;
 
+        const resumeInsights = resume?.analysis
+            ? {
+                summary:
+                    resume.analysis.summary,
+
+                strengths:
+                    resume.analysis.strengths
+                        ?.slice(0, 3) || [],
+
+                missingSkills:
+                    resume.analysis.missingSkills
+                        ?.slice(0, 3) || [],
+
+                topRecommendation:
+                    resume.analysis
+                        .suggestions?.[0] || null,
+            }
+            : null;
+
         return res.status(200).json(
             new ApiResponse(
                 200,
@@ -176,6 +195,9 @@ export const getStudentDashboard =
                                 ]?.overallScore || 0
                                 : 0
                     },
+
+                    resumeInsights:
+                        resumeInsights,
                 },
                 "Dashboard data fetched successfully"
             )
@@ -282,6 +304,7 @@ export const getRecruiterDashboard =
         const candidateStats = {
             total: uniqueCandidates.size,
         };
+
 
         return res.status(200).json(
             new ApiResponse(
