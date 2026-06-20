@@ -28,7 +28,7 @@ function AppInitializer({
 
           dispatch(
             setUser(
-              response.data.data
+              response
             )
           );
         } catch (error) {

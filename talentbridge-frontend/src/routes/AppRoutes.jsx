@@ -7,8 +7,6 @@ import Home from "../pages/Home/Home";
 
 import Login from "../pages/auth/Login";
 
-import StudentDashboard from "../pages/student/StudentDashboard";
-
 import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
 
 import StudentLayout from "../layouts/StudentLayout";
@@ -17,6 +15,7 @@ import RecruiterLayout from "../layouts/RecruiterLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 import Register from "../pages/auth/register";
+import StudentDashboard from "../pages/student/StudentDashboard";
 
 function AppRoutes() {
   return (
@@ -73,6 +72,22 @@ function AppRoutes() {
           element={
             <RecruiterDashboard />
           }
+        />
+      </Route>
+
+      <Route
+        path="/student"
+        element={
+          <ProtectedRoute>
+            <RoleRoute role="STUDENT">
+              <StudentLayout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route
+          path="dashboard"
+          element={<StudentDashboard />}
         />
       </Route>
     </Routes>

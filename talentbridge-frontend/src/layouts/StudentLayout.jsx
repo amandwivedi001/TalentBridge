@@ -1,15 +1,22 @@
-import {
-  Outlet,
-} from "react-router-dom";
+import { Outlet } from "react-router-dom";
+
+import Sidebar from "../components/layout/Sidebar";
+import Navbar from "../components/layout/Navbar";
 
 function StudentLayout() {
   return (
-    <div>
-      Student Navbar
+    <div className="min-h-screen bg-slate-50">
+      <Sidebar />
 
-      <main>
-        <Outlet />
-      </main>
+      <div style={{ marginLeft: "288px" }} className="flex min-h-screen flex-col">
+        <Navbar />
+
+        <main className="flex-1 p-6">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
