@@ -16,6 +16,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 import Register from "../pages/auth/register";
 import StudentDashboard from "../pages/student/StudentDashboard";
+import Jobs from "../pages/jobs/Jobs";
+import JobDetails from "../pages/jobs/JobDetails";
 
 function AppRoutes() {
   return (
@@ -34,26 +36,6 @@ function AppRoutes() {
         path="/register"
         element={<Register />}
       />
-
-      <Route
-        path="/student"
-        element={
-          <ProtectedRoute>
-            <RoleRoute
-              allowedRole="STUDENT"
-            >
-              <StudentLayout />
-            </RoleRoute>
-          </ProtectedRoute>
-        }
-      >
-        <Route
-          path="dashboard"
-          element={
-            <StudentDashboard />
-          }
-        />
-      </Route>
 
       <Route
         path="/recruiter"
@@ -79,7 +61,7 @@ function AppRoutes() {
         path="/student"
         element={
           <ProtectedRoute>
-            <RoleRoute role="STUDENT">
+            <RoleRoute allowedRole="STUDENT">
               <StudentLayout />
             </RoleRoute>
           </ProtectedRoute>
@@ -89,7 +71,17 @@ function AppRoutes() {
           path="dashboard"
           element={<StudentDashboard />}
         />
-      </Route>
+
+        <Route
+          path="jobs"
+          element={<Jobs />}
+        />
+
+        <Route
+          path="jobs/:jobId"
+          element={<JobDetails />}
+        />
+        </Route>
     </Routes>
   );
 }

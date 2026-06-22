@@ -10,7 +10,11 @@ import {
   Zap,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import { useLocation } from "react-router-dom";
+import { logOut } from "../../services/auth.service";
+import toast from "react-hot-toast";
 
 const mainLinks = [
   { label: "Dashboard", icon: LayoutDashboard, to: "/student/dashboard" },
@@ -30,9 +34,16 @@ const preferenceLinks = [
 
 function Sidebar() {
   const { user } = useSelector((state) => state.auth);
+  const location = useLocation();
+
+  const navigate = useNavigate();
 
   const renderLink = (link) => {
     const Icon = link.icon;
+
+    const isActive =
+      location.pathname === link.to ||
+      location.pathname.startsWith(`${link.to}/`);
 
     return (
       <NavLink
@@ -67,9 +78,20 @@ function Sidebar() {
     );
   };
 
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      
+      navigate("/login");
+      toast.success("Logged out successfully");
+    } catch (error) {
+      toast.error("Logout failed");
+    }
+  };
+
   return (
     <aside
-  className="
+      className="
     fixed
     left-0
     top-0
@@ -79,11 +101,11 @@ function Sidebar() {
     w-72
     flex-col
     border-r
-    border-slate-200
+    border-slate-400
     bg-white
     lg:flex
   "
->
+    >
       {/* Logo */}
       <div className="flex h-20 shrink-0 items-center px-6 border-b border-slate-100">
         <div className="flex items-center gap-3">
@@ -186,7 +208,8 @@ function Sidebar() {
             </div>
           </div>
 
-          <button className="rounded-md p-2 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100">
+          <button className="rounded-md p-2 text-slate-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+            onClick={handleLogout}>
             <LogOut size={16} />
           </button>
         </div>

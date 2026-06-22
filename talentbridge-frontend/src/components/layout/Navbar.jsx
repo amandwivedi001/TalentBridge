@@ -12,7 +12,7 @@ function Navbar() {
         z-30
         h-20
         border-b
-        border-slate-200
+        border-slate-400
         bg-white/95
         backdrop-blur
       "
