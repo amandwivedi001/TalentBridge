@@ -6,14 +6,13 @@ function Card({
 }) {
   return (
     <div
-      className={`
-    rounded-2xl
-    border
-    border-slate-200
-    bg-white
-    shadow-sm
-    ${className}
-  `}
+      className={clsx(
+        "rounded-2xl border border-slate-200 bg-white shadow-sm",
+        className
+      )}
+      style={{
+        padding: "1.5rem",
+      }}
     >
       {children}
     </div>

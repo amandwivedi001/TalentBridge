@@ -18,6 +18,7 @@ import Register from "../pages/auth/register";
 import StudentDashboard from "../pages/student/StudentDashboard";
 import Jobs from "../pages/jobs/Jobs";
 import JobDetails from "../pages/jobs/JobDetails";
+import Resume from "../pages/resume/Resume";
 
 function AppRoutes() {
   return (
@@ -80,6 +81,11 @@ function AppRoutes() {
         <Route
           path="jobs/:jobId"
           element={<JobDetails />}
+        />
+
+        <Route
+          path="resume"
+          element={<Resume />}
         />
         </Route>
     </Routes>
