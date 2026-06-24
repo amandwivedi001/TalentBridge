@@ -204,3 +204,39 @@ export const extractResumeText = asyncHandler(async (req, res) => {
             )
         )
 })
+
+export const viewResume = asyncHandler(async (req, res) => {
+    const studentId = req.user.studentProfile.id;
+
+    const resume = await prisma.resume.findUnique({
+        where: {
+            studentId,
+        },
+    });
+
+    if (!resume) {
+        throw new ApiError(404, "Resume not found");
+    }
+
+    const response = await fetch(resume.fileUrl);
+
+    if (!response.ok) {
+        throw new ApiError(500, "Failed to fetch resume");
+    }
+
+    const buffer = Buffer.from(
+        await response.arrayBuffer()
+    );
+
+    res.setHeader(
+        "Content-Type",
+        "application/pdf"
+    );
+
+    res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${resume.fileName}"`
+    );
+
+    return res.send(buffer);
+});
