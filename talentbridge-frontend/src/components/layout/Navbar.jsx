@@ -17,9 +17,20 @@ function Navbar() {
         backdrop-blur
       "
     >
-      <div className="flex h-full items-center justify-end px-8">
+      <div
+        className="flex h-full items-center justify-end"
+        style={{
+          paddingLeft: "2rem", // px-8
+          paddingRight: "2rem", // px-8
+        }}
+      >
         <div className="flex items-center gap-4">
-          <button className="relative rounded-xl p-2 transition hover:bg-slate-100">
+          <button
+            className="relative rounded-xl transition hover:bg-slate-100"
+            style={{
+              padding: "0.5rem", // p-2
+            }}
+          >
             <Bell size={20} className="text-slate-700" />
 
             <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
@@ -52,8 +63,10 @@ function Navbar() {
                 {user?.name}
               </p>
 
-              <p className="text-xs text-slate-500">
-                Student
+              <p>
+                {user.role === "STUDENT"
+                  ? "Student"
+                  : "Recruiter"}
               </p>
             </div>
           </div>

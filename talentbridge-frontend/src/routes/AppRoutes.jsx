@@ -107,6 +107,23 @@ function AppRoutes() {
         />
 
         </Route>
+      <Route
+        path="/recruiter"
+        element={
+          <ProtectedRoute>
+            <RoleRoute allowedRole="RECRUITER">
+              <RecruiterLayout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+
+        <Route
+        path="dashboard"
+        element={<RecruiterDashboard/>}
+        />
+
+      </Route>
     </Routes>
   );
 }

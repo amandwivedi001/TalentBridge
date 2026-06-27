@@ -8,6 +8,7 @@ import {
   Settings,
   HelpCircle,
   Zap,
+  BarChart3,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -15,25 +16,12 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { logOut } from "../../services/auth.service";
 import toast from "react-hot-toast";
-
-const mainLinks = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/student/dashboard" },
-  { label: "Resume", icon: FileText, to: "/student/resume" },
-  { label: "Jobs", icon: Briefcase, to: "/student/jobs" },
-];
-
-const careerLinks = [
-  { label: "Interview", icon: Brain, to: "/student/interviews" },
-  { label: "Notifications", icon: Bell, to: "/student/notifications" },
-];
-
-const preferenceLinks = [
-  { label: "Settings", icon: Settings, to: "/student/settings" },
-  { label: "Help Center", icon: HelpCircle, to: "/student/help" },
-];
+import { sidebarConfig } from "../../config/sidebar.config";
 
 function Sidebar() {
   const { user } = useSelector((state) => state.auth);
+  const role = user?.role || "STUDENT";
+  const config = sidebarConfig[role];
   const location = useLocation();
 
   const navigate = useNavigate();
@@ -81,7 +69,7 @@ function Sidebar() {
   const handleLogout = async () => {
     try {
       await logOut();
-      
+
       navigate("/login");
       toast.success("Logged out successfully");
     } catch (error) {
@@ -119,7 +107,7 @@ function Sidebar() {
             </h1>
 
             <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-              AI Career Platform
+              {config.subtitle}
             </p>
           </div>
         </div>
@@ -127,67 +115,79 @@ function Sidebar() {
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="flex flex-col gap-8">
-          {/* Main */}
-          <div>
-            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-widest text-slate-400">
-              Main
+        {config.sections.map((section) => (
+          <div key={section.title}>
+            <p
+              className="text-xs font-bold uppercase tracking-widest text-slate-400"
+              style={{
+                marginBottom: "0.75rem", // mb-3
+                paddingLeft: "0.75rem",  // px-3
+                paddingRight: "0.75rem", // px-3
+              }}
+            >
+              {section.title}
             </p>
 
             <nav className="flex flex-col gap-1">
-              {mainLinks.map(renderLink)}
+              {section.links.map(renderLink)}
             </nav>
           </div>
-
-          {/* Career */}
-          <div>
-            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-widest text-slate-400">
-              Career
-            </p>
-
-            <nav className="flex flex-col gap-1">
-              {careerLinks.map(renderLink)}
-            </nav>
-          </div>
-
-          {/* Preferences */}
-          <div>
-            <p className="mb-3 px-3 text-xs font-bold uppercase tracking-widest text-slate-400">
-              Preferences
-            </p>
-
-            <nav className="flex flex-col gap-1">
-              {preferenceLinks.map(renderLink)}
-            </nav>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Bottom Widgets */}
       <div className="shrink-0 px-4 pb-6">
         {/* Profile Strength */}
-        <div className="mb-4 rounded-xl border border-blue-100 bg-gradient-to-br from-indigo-50 to-blue-50 p-4 shadow-sm">
-          <div className="mb-2 flex items-center gap-2 text-blue-800">
-            <Zap size={16} className="fill-blue-600 text-blue-600" />
-            <span className="text-sm font-bold">
-              Profile Strength
-            </span>
-          </div>
+        <div className="shrink-0 px-4 pb-6">
+          {config.widget === "profile" ? (
+            // Student Widget
+            <div className="mb-4 rounded-xl border border-blue-100 bg-gradient-to-br from-indigo-50 to-blue-50 p-4 shadow-sm">
+              <div className="mb-2 flex items-center gap-2 text-blue-800">
+                <Zap size={16} className="fill-blue-600 text-blue-600" />
+                <span className="text-sm font-bold">Profile Strength</span>
+              </div>
 
-          <p className="mb-3 text-xs text-slate-600">
-            Add your latest projects to stand out to recruiters.
-          </p>
+              <p className="mb-3 text-xs text-slate-600">
+                Add your latest projects to stand out to recruiters.
+              </p>
 
-          <div className="mb-1 h-1.5 w-full rounded-full bg-blue-200">
-            <div
-              className="h-1.5 rounded-full bg-blue-600"
-              style={{ width: "70%" }}
-            />
-          </div>
+              <div className="mb-1 h-1.5 w-full rounded-full bg-blue-200">
+                <div
+                  className="h-1.5 rounded-full bg-blue-600"
+                  style={{ width: "70%" }}
+                />
+              </div>
 
-          <p className="text-right text-[10px] font-medium text-blue-700">
-            70% Complete
-          </p>
+              <p className="text-right text-[10px] font-medium text-blue-700">
+                70% Complete
+              </p>
+            </div>
+          ) : (
+            // Recruiter Widget
+            <div className="mb-4 rounded-xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 shadow-sm">
+              <div className="mb-3 flex items-center gap-2 text-emerald-800">
+                <BarChart3 size={16} />
+                <span className="text-sm font-bold">Hiring Overview</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-600">Active Jobs</span>
+                  <span className="text-sm font-bold text-emerald-700">12</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-600">Applications</span>
+                  <span className="text-sm font-bold text-blue-700">48</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-600">Interviews</span>
+                  <span className="text-sm font-bold text-violet-700">6</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* User Card */}
