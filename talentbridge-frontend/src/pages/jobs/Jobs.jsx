@@ -1,3 +1,10 @@
+import {
+  BriefcaseBusiness,
+  Building2,
+  Search,
+  Sparkles,
+} from "lucide-react";
+
 import { useEffect, useState } from "react";
 import { SearchX, SlidersHorizontal, MapPin, Code, IndianRupee } from "lucide-react";
 
@@ -72,43 +79,211 @@ function Jobs() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
 
       <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-white to-indigo-50 opacity-70" />
 
-        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between p-8">
+        {/* Background */}
 
-          {/* Left Content */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-50 via-white to-blue-50" />
+
+        <div className="absolute -top-20 -right-16 h-64 w-64 rounded-full bg-indigo-100/50 blur-3xl" />
+
+        <div className="absolute bottom-0 right-48 h-40 w-40 rounded-full bg-blue-100/50 blur-2xl" />
+
+        <div
+          className="relative flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between"
+          style={{ padding: "2.5rem" }}
+        >
+
+          {/* Left */}
+
           <div className="max-w-3xl">
-            <div className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700 border border-blue-100">
-              Career Portal
+
+            <div
+              className="
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-full
+                    border
+                    border-indigo-100
+                    bg-indigo-50
+                    text-sm
+                    font-medium
+                    text-indigo-700
+                "
+              style={{ padding: "0.5rem 1rem" }}
+            >
+              <Sparkles size={16} />
+
+              AI Career Portal
             </div>
 
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900">
-              Find Your Next Opportunity
+            <h1
+              className="
+                    text-5xl
+                    font-bold
+                    tracking-tight
+                    text-slate-900
+                "
+              style={{ marginTop: "1.5rem" }}
+            >
+              Find Your Next
+              <span className="text-indigo-600">
+                {" "}Opportunity
+              </span>
             </h1>
 
-            <p className="mt-3 text-lg text-slate-600 leading-relaxed">
-              Discover internships and full-time roles from top recruiters,
-              tailored to your skills and career goals.
+            <p
+              className="
+                    max-w-2xl
+                    text-lg
+                    leading-8
+                    text-slate-600
+                "
+              style={{ marginTop: "1.25rem" }}
+            >
+              Explore internships and full-time opportunities from
+              verified recruiters. Find roles that match your skills,
+              experience, and career aspirations.
             </p>
+
+            <div
+              className="flex flex-wrap gap-4"
+              style={{ marginTop: "2rem" }}
+            >
+
+              <button
+                className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-2xl
+                        bg-indigo-600
+                        font-semibold
+                        text-white
+                        transition
+                        hover:bg-indigo-700
+                    "
+                style={{ padding: "0.75rem 1.5rem" }}
+              >
+                <Search size={18} />
+
+                Browse Jobs
+              </button>
+
+            </div>
+
           </div>
 
-          {/* Right Stats */}
-          <div className="mt-8 lg:mt-0 flex gap-4">
-            <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
-              <p className="text-3xl font-bold text-blue-600">{jobs.length}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          {/* Stats */}
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+            <div
+              className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white/90
+                    text-center
+                    shadow-sm
+                    backdrop-blur
+                "
+              style={{ padding: "1.5rem" }}
+            >
+
+              <BriefcaseBusiness
+                className="mx-auto text-indigo-600"
+                size={24}
+              />
+
+              <p
+                className="text-4xl font-bold text-slate-900"
+                style={{ marginTop: "0.75rem" }}
+              >
+                {jobs.length}
+              </p>
+
+              <p
+                className="text-sm text-slate-500"
+                style={{ marginTop: "0.25rem" }}
+              >
                 Open Jobs
               </p>
+
             </div>
 
-            <div className="min-w-[140px] rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
-              <p className="text-3xl font-bold text-indigo-600">{uniqueCompanies}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <div
+              className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white/90
+                    text-center
+                    shadow-sm
+                    backdrop-blur
+                "
+              style={{ padding: "1.5rem" }}
+            >
+
+              <Building2
+                className="mx-auto text-indigo-600"
+                size={24}
+              />
+
+              <p
+                className="text-4xl font-bold text-slate-900"
+                style={{ marginTop: "0.75rem" }}
+              >
+                {uniqueCompanies}
+              </p>
+
+              <p
+                className="text-sm text-slate-500"
+                style={{ marginTop: "0.25rem" }}
+              >
                 Companies
               </p>
+
             </div>
+
+            <div
+              className="
+                    rounded-2xl
+                    border
+                    border-slate-200
+                    bg-white/90
+                    text-center
+                    shadow-sm
+                    backdrop-blur
+                "
+              style={{ padding: "1.5rem" }}
+            >
+
+              <Sparkles
+                className="mx-auto text-indigo-600"
+                size={24}
+              />
+
+              <p
+                className="text-4xl font-bold text-slate-900"
+                style={{ marginTop: "0.75rem" }}
+              >
+                AI
+              </p>
+
+              <p
+                className="text-sm text-slate-500"
+                style={{ marginTop: "0.25rem" }}
+              >
+                Smart Matching
+              </p>
+
+            </div>
+
           </div>
+
         </div>
+
       </div>
 
       {/* 2. Unified Search & Filter Command Bar */}

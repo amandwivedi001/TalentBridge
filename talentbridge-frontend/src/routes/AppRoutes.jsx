@@ -19,6 +19,9 @@ import StudentDashboard from "../pages/student/StudentDashboard";
 import Jobs from "../pages/jobs/Jobs";
 import JobDetails from "../pages/jobs/JobDetails";
 import Resume from "../pages/resume/Resume";
+import Interview from "../pages/interview/Interview";
+import InterviewSession from "../pages/interview/InterviewSession";
+import InterviewReport from "../pages/interview/InterviewReport";
 
 function AppRoutes() {
   return (
@@ -87,6 +90,22 @@ function AppRoutes() {
           path="resume"
           element={<Resume />}
         />
+
+        <Route
+          path="interviews"
+          element={<Interview />}
+        />
+
+        <Route
+          path="interviews/session/:sessionId"
+          element={<InterviewSession />}
+        />
+
+        <Route
+          path="interviews/report/:sessionId"
+          element={<InterviewReport />}
+        />
+
         </Route>
     </Routes>
   );
