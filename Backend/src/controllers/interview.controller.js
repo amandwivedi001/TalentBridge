@@ -586,3 +586,126 @@ export const getInterviewStats =
       )
     );
   });
+
+export const getInterviewReport =
+    asyncHandler(async (req, res) => {
+
+        const studentId =
+            req.user.studentProfile.id;
+
+        const { sessionId } =
+            req.params;
+
+        const session =
+            await prisma.interviewSession.findUnique({
+
+                where: {
+                    id: sessionId,
+                },
+
+                include: {
+
+                    questions: {
+
+                        orderBy: {
+                            createdAt: "asc",
+                        },
+
+                        select: {
+                            id: true,
+                            question: true,
+                            answer: true,
+                            score: true,
+                            feedback: true,
+                        },
+
+                    },
+
+                },
+
+            });
+
+        if (!session) {
+
+            throw new ApiError(
+                404,
+                "Interview report not found."
+            );
+
+        }
+
+        if (
+            session.studentId !== studentId
+        ) {
+
+            throw new ApiError(
+                403,
+                "Access denied."
+            );
+
+        }
+
+        if (
+            session.status !==
+            "COMPLETED"
+        ) {
+
+            throw new ApiError(
+                400,
+                "Interview has not been completed yet."
+            );
+
+        }
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                {
+
+                    sessionId: session.id,
+
+                    interviewType:
+                        session.interviewType,
+
+                    difficulty:
+                        session.difficulty,
+
+                    skill:
+                        session.skill,
+
+                    overallScore:
+                        session.overallScore,
+
+                    overallFeedback:
+                        session.overallFeedback,
+
+                    strengths:
+                        session.strengths,
+
+                    weaknesses:
+                        session.weaknesses,
+
+                    improvementAreas:
+                        session.improvementAreas,
+
+                    completedAt:
+                        session.updatedAt,
+
+                    totalQuestions:
+                        session.questions.length,
+
+                    questions:
+                        session.questions,
+
+                },
+
+                "Interview report fetched successfully"
+
+            )
+
+        );
+
+    });

@@ -1,6 +1,6 @@
 import express from "express"
 import { allowRoles, protect } from "../middleware/auth.middleware.js";
-import { completeInterview, getInterviewDetails, getInterviewHistory, getInterviewStats, startInterview, submitAnswer } from "../controllers/interview.controller.js";
+import { completeInterview, getInterviewDetails, getInterviewHistory, getInterviewReport, getInterviewStats, startInterview, submitAnswer } from "../controllers/interview.controller.js";
 import validate from "../middleware/validate.middleware.js"
 import { startInterviewSchema } from "../validators/interview.validator.js";
 
@@ -47,6 +47,13 @@ router.get(
   protect,
   allowRoles("STUDENT"),
   getInterviewDetails
+);
+
+router.get(
+    "/:sessionId/report",
+    protect,
+    allowRoles("STUDENT"),
+    getInterviewReport
 );
 
 export default router;
