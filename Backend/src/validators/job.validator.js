@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 export const createJobSchema = z.object({
+  isActive: z
+    .boolean()
+    .optional(),
+
+
   title: z
     .string()
     .min(3, "Job title is required")

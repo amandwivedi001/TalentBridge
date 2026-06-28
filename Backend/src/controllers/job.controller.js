@@ -53,6 +53,19 @@ export const getMyJobs = asyncHandler(async (req, res) => {
     orderBy: {
       createdAt: "desc",
     },
+    include: {
+
+      _count: {
+
+        select: {
+
+          applications: true,
+
+        },
+
+      },
+
+    }
   });
 
   return res.status(200).json(
@@ -79,6 +92,15 @@ export const getJobById = asyncHandler(async (req, res) => {
           designation: true,
           companyLocation: true,
         },
+      },
+      _count: {
+
+        select: {
+
+          applications: true,
+
+        },
+
       },
     },
   });
@@ -181,7 +203,7 @@ export const updateJob = asyncHandler(async (req, res) => {
 
   const updateData = await prisma.job.update({
     where: {
-      id : jobId,
+      id: jobId,
     },
 
     data: {
@@ -213,7 +235,7 @@ export const deleteJob = asyncHandler(async (req, res) => {
 
   const job = await prisma.job.findUnique({
     where: {
-      id : jobId,
+      id: jobId,
     },
     include: {
       recruiter: {
@@ -259,3 +281,40 @@ export const deleteJob = asyncHandler(async (req, res) => {
       )
     )
 })
+
+export const toggleJobStatus = asyncHandler(async (req, res) => {
+
+    const { jobId } = req.params;
+    const { isActive } = req.body;
+
+    const recruiterId = req.user.recruiterProfile.id;
+
+    const job = await prisma.job.findFirst({
+        where: {
+            id: jobId,
+            recruiterId,
+        },
+    });
+
+    if (!job) {
+        throw new ApiError(404, "Job not found");
+    }
+
+    const updatedJob = await prisma.job.update({
+        where: {
+            id: jobId,
+        },
+        data: {
+            isActive,
+        },
+    });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            updatedJob,
+            `Job ${isActive ? "opened" : "closed"} successfully`
+        )
+    );
+
+});

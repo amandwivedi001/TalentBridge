@@ -7,6 +7,7 @@ import {
   getAllJobs,
   deleteJob,
   updateJob,
+  toggleJobStatus,
 } from "../controllers/job.controller.js";
 
 import {
@@ -61,6 +62,13 @@ router.delete(
   protect,
   allowRoles("RECRUITER"),
   deleteJob
+);
+
+router.patch(
+  "/:jobId/status",
+  protect,
+  allowRoles("RECRUITER"),
+  toggleJobStatus
 );
 
 export default router;
