@@ -7,7 +7,7 @@ import Home from "../pages/Home/Home";
 
 import Login from "../pages/auth/Login";
 
-import RecruiterDashboard from "../pages/recruiter/RecruiterDashboard";
+import RecruiterDashboard from "../pages/recruiter/Dashboard/RecruiterDashboard";
 
 import StudentLayout from "../layouts/StudentLayout";
 import RecruiterLayout from "../layouts/RecruiterLayout";
@@ -15,13 +15,17 @@ import RecruiterLayout from "../layouts/RecruiterLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 import Register from "../pages/auth/register";
-import StudentDashboard from "../pages/student/StudentDashboard";
-import Jobs from "../pages/jobs/Jobs";
-import JobDetails from "../pages/jobs/JobDetails";
-import Resume from "../pages/resume/Resume";
-import Interview from "../pages/interview/Interview";
-import InterviewSession from "../pages/interview/InterviewSession";
-import InterviewReport from "../pages/interview/InterviewReport";
+import StudentDashboard from "../pages/student/Dashboard/StudentDashboard";
+import Jobs from "../pages/student/jobs/Jobs";
+import JobDetails from "../pages/student/jobs/JobDetails";
+import Resume from "../pages/student/resume/Resume";
+import Interview from "../pages/student/interview/Interview";
+import InterviewSession from "../pages/student/interview/InterviewSession";
+import InterviewReport from "../pages/student/interview/InterviewReport";
+import EditJob from "../pages/recruiter/jobs/EditJob";
+import RecruiterJobDetails from "../pages/recruiter/jobs/RecruiterJobDetails";
+import CreateJob from "../pages/recruiter/jobs/CreateJob";
+import RecruiterJobs from "../pages/recruiter/jobs/RecruiterJobs";
 
 function AppRoutes() {
   return (
@@ -40,26 +44,6 @@ function AppRoutes() {
         path="/register"
         element={<Register />}
       />
-
-      <Route
-        path="/recruiter"
-        element={
-          <ProtectedRoute>
-            <RoleRoute
-              allowedRole="RECRUITER"
-            >
-              <RecruiterLayout />
-            </RoleRoute>
-          </ProtectedRoute>
-        }
-      >
-        <Route
-          path="dashboard"
-          element={
-            <RecruiterDashboard />
-          }
-        />
-      </Route>
 
       <Route
         path="/student"
@@ -106,7 +90,7 @@ function AppRoutes() {
           element={<InterviewReport />}
         />
 
-        </Route>
+      </Route>
       <Route
         path="/recruiter"
         element={
@@ -119,8 +103,28 @@ function AppRoutes() {
       >
 
         <Route
-        path="dashboard"
-        element={<RecruiterDashboard/>}
+          path="dashboard"
+          element={<RecruiterDashboard />}
+        />
+
+        <Route
+          path="jobs"
+          element={<RecruiterJobs />}
+        />
+
+        <Route
+          path="jobs/create"
+          element={<CreateJob />}
+        />
+
+        <Route
+          path="jobs/:jobId"
+          element={<RecruiterJobDetails />}
+        />
+
+        <Route
+          path="jobs/:jobId/edit"
+          element={<EditJob />}
         />
 
       </Route>
