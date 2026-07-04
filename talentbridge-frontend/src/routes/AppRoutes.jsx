@@ -5,7 +5,7 @@ import {
 
 import Home from "../pages/Home/Home";
 
-import Login from "../pages/auth/Login";
+import Login from "../pages/auth/login";
 
 import RecruiterDashboard from "../pages/recruiter/Dashboard/RecruiterDashboard";
 
