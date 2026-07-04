@@ -4,6 +4,7 @@ import {
   getNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
+  getUnreadNotificationCount,
 } from "../controllers/notification.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -26,5 +27,11 @@ router.patch(
   protect,
   markNotificationAsRead
 );
+
+router.get(
+  "/unread",
+  protect,
+  getUnreadNotificationCount
+)
 
 export default router;

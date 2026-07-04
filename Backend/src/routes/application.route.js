@@ -8,6 +8,8 @@ import {
   updateApplicationStatus,
   getApplicationPipeline,
   getApplicationStats,
+  getRecruiterApplications,
+  getApplicationDetails,
 } from "../controllers/application.controller.js";
 
 import {
@@ -66,4 +68,17 @@ router.get(
   getApplicationStats
 );
 
+router.get(
+    "/recruiter",
+    protect,
+    allowRoles("RECRUITER"),
+    getRecruiterApplications
+);
+
+router.get(
+    "/:applicationId",
+    protect,
+    allowRoles("RECRUITER"),
+    getApplicationDetails
+);
 export default router;

@@ -240,3 +240,196 @@ export const viewResume = asyncHandler(async (req, res) => {
 
     return res.send(buffer);
 });
+
+export const viewCandidateResume =
+    asyncHandler(async (req, res) => {
+
+        const { studentId } =
+            req.params;
+
+        const recruiterId =
+            req.user.recruiterProfile.id;
+
+        const student =
+            await prisma.studentProfile.findUnique({
+
+                where: {
+                    id: studentId,
+                },
+
+                include: {
+
+                    resume: true,
+
+                },
+
+            });
+
+        if (!student) {
+
+            throw new ApiError(
+                404,
+                "Student not found"
+            );
+
+        }
+
+        if (!student.resume) {
+
+            throw new ApiError(
+                404,
+                "Resume not found"
+            );
+
+        }
+
+        const hasApplied =
+            await prisma.application.findFirst({
+
+                where: {
+
+                    studentId,
+
+                    job: {
+                        recruiterId,
+                    },
+
+                },
+
+            });
+
+        if (!hasApplied) {
+
+            throw new ApiError(
+                403,
+                "Access denied"
+            );
+
+        }
+
+        const response =
+            await fetch(
+                student.resume.fileUrl
+            );
+
+        if (!response.ok) {
+
+            throw new ApiError(
+                500,
+                "Failed to fetch resume"
+            );
+
+        }
+
+        const buffer = Buffer.from(
+            await response.arrayBuffer()
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "application/pdf"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${student.resume.fileName}"`
+        );
+
+        return res.send(buffer);
+
+    });
+
+export const downloadCandidateResume =
+    asyncHandler(async (req, res) => {
+
+        const { studentId } = req.params;
+
+        const recruiterId =
+            req.user.recruiterProfile.id;
+
+        const student =
+            await prisma.studentProfile.findUnique({
+
+                where: {
+                    id: studentId,
+                },
+
+                include: {
+                    resume: true,
+                },
+
+            });
+
+        if (!student) {
+
+            throw new ApiError(
+                404,
+                "Student not found"
+            );
+
+        }
+
+        if (!student.resume) {
+
+            throw new ApiError(
+                404,
+                "Resume not found"
+            );
+
+        }
+
+        const hasApplied =
+            await prisma.application.findFirst({
+
+                where: {
+
+                    studentId,
+
+                    job: {
+                        recruiterId,
+                    },
+
+                },
+
+            });
+
+        if (!hasApplied) {
+
+            throw new ApiError(
+                403,
+                "Access denied"
+            );
+
+        }
+
+        const response =
+            await fetch(
+                student.resume.fileUrl
+            );
+
+        if (!response.ok) {
+
+            throw new ApiError(
+                500,
+                "Failed to fetch resume"
+            );
+
+        }
+
+        const buffer = Buffer.from(
+            await response.arrayBuffer()
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "application/pdf"
+        );
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${student.resume.fileName}"`
+        );
+
+        return res.send(buffer);
+
+    });

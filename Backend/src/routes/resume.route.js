@@ -1,4 +1,4 @@
-import { getMyResume, uploadResume , extractResumeText, viewResume} from "../controllers/resume.controller.js";
+import { getMyResume, uploadResume , extractResumeText, viewResume, viewCandidateResume, downloadCandidateResume} from "../controllers/resume.controller.js";
 import {protect, allowRoles } from "../middleware/auth.middleware.js";
 import express from "express"
 import { upload } from "../middleware/upload.middleware.js";
@@ -21,6 +21,20 @@ router.get(
     "/view",
     protect,
     viewResume
+);
+
+router.get(
+    "/view/:studentId",
+    protect,
+    allowRoles("RECRUITER"),
+    viewCandidateResume
+);
+
+router.get(
+    "/download/:studentId",
+    protect,
+    allowRoles("RECRUITER"),
+    downloadCandidateResume
 );
 
 export default router;

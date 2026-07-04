@@ -169,7 +169,9 @@ export const getApplicantsForJob =
         const applicants =
             await prisma.application.findMany({
                 where: {
+
                     jobId,
+
                 },
 
                 include: {
@@ -181,13 +183,27 @@ export const getApplicantsForJob =
                                     email: true,
                                 },
                             },
+
+                            resume: {
+                                include: {
+                                    analysis: {
+                                        select: {
+                                            atsScore: true,
+                                            cgpa: true,
+                                            skills: true,
+                                        },
+                                    },
+                                },
+                            },
                         },
                     },
+
                 },
 
                 orderBy: {
                     createdAt: "desc",
                 },
+
             });
 
         return res.status(200).json(
@@ -604,4 +620,185 @@ export const getApplicationStats =
                 "Application analytics fetched successfully"
             )
         );
+    });
+
+export const getRecruiterApplications =
+    asyncHandler(async (req, res) => {
+
+        const recruiterId =
+            req.user.recruiterProfile.id;
+
+        const applications =
+            await prisma.application.findMany({
+                where: {
+
+                    job: {
+                        recruiterId,
+                    },
+
+                },
+
+                include: {
+
+                    job: {
+
+                        select: {
+                            id: true,
+                            title: true,
+                            role: true,
+                        },
+
+                    },
+
+                    student: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                },
+                            },
+
+                            resume: {
+                                include: {
+                                    analysis: {
+                                        select: {
+                                            atsScore: true,
+                                            cgpa: true,
+                                            skills: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+
+                },
+
+                orderBy: {
+                    createdAt: "desc",
+                },
+
+            });
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                applications,
+
+                "Applications fetched successfully"
+
+            )
+
+        );
+
+    });
+
+export const getApplicationDetails =
+    asyncHandler(async (req, res) => {
+
+        const { applicationId } = req.params;
+
+        const recruiterId =
+            req.user.recruiterProfile.id;
+
+        const application =
+            await prisma.application.findUnique({
+
+                where: {
+                    id: applicationId,
+                },
+
+                include: {
+                    
+                    candidateMatch: true,
+                    
+                    job: {
+                        select: {
+                            id: true,
+                            title: true,
+                            role: true,
+                            recruiterId: true,
+                        },
+                    },
+
+                    student: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                },
+                            },
+
+                            resume: {
+                                select: {
+                                    fileName: true,
+                                    fileUrl: true,
+                                    uploadedAt: true,
+
+                                    analysis: {
+                                        select: {
+                                            atsScore: true,
+                                            summary: true,
+                                            skills: true,
+                                            strengths: true,
+                                            weaknesses: true,
+                                            missingSkills: true,
+                                            suggestions: true,
+                                            cgpa: true,
+                                            tenthPercentage: true,
+                                            twelfthPercentage: true,
+                                            createdAt: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+
+                },
+
+            });
+
+        if (!application) {
+
+            throw new ApiError(
+                404,
+                "Application not found"
+            );
+
+        }
+
+        if (
+            application.job.recruiterId !==
+            recruiterId
+        ) {
+
+            throw new ApiError(
+                403,
+                "Access denied"
+            );
+
+        }
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                application,
+
+                "Application details fetched successfully"
+
+            )
+
+        );
+
     });

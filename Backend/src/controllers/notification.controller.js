@@ -134,3 +134,32 @@ export const markAllNotificationsAsRead =
             )
         );
     });
+
+export const getUnreadNotificationCount =
+    asyncHandler(async (req, res) => {
+
+        const count =
+            await prisma.notification.count({
+
+                where: {
+                    userId: req.user.id,
+                    isRead: false,
+                },
+
+            });
+
+        return res.status(200).json(
+
+            new ApiResponse(
+
+                200,
+
+                { count },
+
+                "Unread notification count fetched successfully"
+
+            )
+
+        );
+
+    });
