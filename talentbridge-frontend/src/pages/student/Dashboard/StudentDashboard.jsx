@@ -24,7 +24,7 @@ import StatCard from "../../../components/student/dashboard/StatCard";
 import QuickActions from "../../../components/student/dashboard/QuickActions";
 import RecentActivity from "../../../components/student/dashboard/RecentActivity";
 import DashboardSkeleton from "../../../components/student/dashboard/DashboardSkeleton";
-import DashboardHero from "../../../components/student/dashboard/DashBoardHero";
+import DashboardHero from "../../../components/student/dashboard/DashboardHero";
 import AIInsightCard from "../../../components/student/dashboard/AIIngsightCard";
 import ApplicationPipeline from "../../../components/student/dashboard/ApplicationPipeline";
 
