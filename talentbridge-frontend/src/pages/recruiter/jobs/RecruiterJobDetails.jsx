@@ -6,7 +6,12 @@ import {
     getJobById,
     deleteJob,
     updateJobStatus,
+    getRankedCandidates,
 } from "../../../services/recruiterJob.service";
+
+import {
+    getApplicantsForJob,
+} from "../../../services/application.service";
 
 import JobHero from "../../../components/recruiter/jobs/JobHero";
 import JobDescriptionCard from "../../../components/recruiter/jobs/JobDescriptionCard";
@@ -14,6 +19,10 @@ import JobEligibilityCard from "../../../components/recruiter/jobs/JobEligibilit
 import JobStatisticsCard from "../../../components/recruiter/jobs/JobStatisticsCard";
 import DeleteDialog from "../../../components/recruiter/jobs/DeleteDialog";
 import JobsSkeleton from "../../../components/recruiter/jobs/JobsSkeleton";
+import ApplicantsSection from "../../../components/recruiter/jobs/ApplicantsSection";
+
+import CandidateRanking from "../../../components/recruiter/ai/CandidateRanking"
+import RankingSkeleton from "../../../components/recruiter/ai/RankingSkeleton";
 
 function RecruiterJobDetails() {
 
@@ -33,9 +42,25 @@ function RecruiterJobDetails() {
     const [showDelete, setShowDelete] =
         useState(false);
 
+    const [applicants, setApplicants] =
+        useState([]);
+
+    const [loadingApplicants, setLoadingApplicants] =
+        useState(false);
+
+    const [rankedCandidates, setRankedCandidates] =
+        useState([]);
+
+    const [loadingRanking, setLoadingRanking] =
+        useState(false);
+
     useEffect(() => {
 
         fetchJob();
+
+        fetchApplicants();
+
+        fetchRanking();
 
     }, [jobId]);
 
@@ -66,6 +91,69 @@ function RecruiterJobDetails() {
         finally {
 
             setLoading(false);
+
+        }
+
+    };
+
+    const fetchApplicants =
+        async () => {
+
+            try {
+
+                setLoadingApplicants(true);
+
+                const data =
+                    await getApplicantsForJob(jobId);
+
+                setApplicants(data);
+            }
+
+            catch (error) {
+
+                toast.error(
+
+                    error.response?.data?.message ||
+
+                    "Unable to load applicants."
+
+                );
+
+            }
+
+            finally {
+
+                setLoadingApplicants(false);
+
+            }
+
+        };
+
+    const fetchRanking = async () => {
+
+        try {
+
+            setLoadingRanking(true);
+
+            const rankings =
+                await getRankedCandidates(jobId);
+
+            setRankedCandidates(rankings);
+
+        }
+
+        catch (error) {
+
+            toast.error(
+                error.response?.data?.message ||
+                "Unable to fetch ranking."
+            );
+
+        }
+
+        finally {
+
+            setLoadingRanking(false);
 
         }
 
@@ -202,10 +290,15 @@ function RecruiterJobDetails() {
                 <JobStatisticsCard
                     job={job}
                 />
-
             </div>
 
-            {/* Reserved for Day 10 */}
+            {loadingRanking ? (
+                <RankingSkeleton />
+            ) : (
+                <CandidateRanking
+                    candidates={rankedCandidates}
+                />
+            )}
 
             <section
                 className="
@@ -221,27 +314,32 @@ function RecruiterJobDetails() {
                 }}
             >
 
-                <h2
-                    className="
-                        text-2xl
-                        font-bold
-                        text-slate-900
-                    "
-                >
-                    Applicants
-                </h2>
+                {loadingApplicants ? (
 
-                <p
-                    className="
-                        text-slate-500
-                    "
-                    style={{
-                        marginTop: "0.75rem",
-                    }}
-                >
-                    Candidate management will be
-                    available here in the next module.
-                </p>
+                    <div
+                        className="
+            rounded-3xl
+            border
+            border-slate-200
+            bg-white
+            shadow-sm
+        "
+                        style={{ padding: "2rem" }}
+                    >
+
+                        <p className="text-slate-500">
+                            Loading applicants...
+                        </p>
+
+                    </div>
+
+                ) : (
+
+                    <ApplicantsSection
+                        applicants={applicants}
+                    />
+
+                )}
 
             </section>
 

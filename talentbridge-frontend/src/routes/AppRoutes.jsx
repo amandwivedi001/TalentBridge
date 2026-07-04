@@ -26,6 +26,10 @@ import EditJob from "../pages/recruiter/jobs/EditJob";
 import RecruiterJobDetails from "../pages/recruiter/jobs/RecruiterJobDetails";
 import CreateJob from "../pages/recruiter/jobs/CreateJob";
 import RecruiterJobs from "../pages/recruiter/jobs/RecruiterJobs";
+import RecruiterApplications from "../pages/recruiter/application/RecruiterApplications";
+import RecruiterCandidateDetails from "../pages/recruiter/candidate/RecruiterCandidateDetails";
+import RecruiterNotifications from "../pages/recruiter/notification/RecruiterNotifications";
+import StudentNotifications from "../pages/student/notification/StudentNotifications";
 
 function AppRoutes() {
   return (
@@ -90,6 +94,11 @@ function AppRoutes() {
           element={<InterviewReport />}
         />
 
+        <Route
+          path="notifications"
+          element={<StudentNotifications />}
+        />
+
       </Route>
       <Route
         path="/recruiter"
@@ -125,6 +134,23 @@ function AppRoutes() {
         <Route
           path="jobs/:jobId/edit"
           element={<EditJob />}
+        />
+
+        <Route
+          path="applications"
+          element={<RecruiterApplications />}
+        />
+
+        <Route
+          path="candidates/:applicationId"
+          element={
+            <RecruiterCandidateDetails />
+          }
+        />
+
+        <Route
+          path="notifications"
+          element={<RecruiterNotifications />}
         />
 
       </Route>

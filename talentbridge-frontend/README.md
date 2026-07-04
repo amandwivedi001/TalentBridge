@@ -2510,3 +2510,267 @@ The two major foundations of the placement platform are now complete:
 * ✅ Recruiter Job Management
 
 The remaining recruiter modules primarily focus on extending these foundations with candidate workflows, application management, analytics, and notifications.
+
+# Phase 6 — Day 10
+
+## Overview
+
+During **Phase 6 - Day 10**, the **Recruiter Applications Management** module was completed along with a fully functional **Notification System** for both the **Student** and **Recruiter** portals.
+
+This phase focused on enabling recruiters to efficiently manage job applications, review candidate profiles, update hiring statuses, and providing a centralized notification experience across the platform.
+
+---
+
+# Backend Development
+
+## Recruiter Applications APIs
+
+Implemented the following APIs for recruiter application management:
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/applications/recruiter` | Fetch all applications received by the recruiter |
+| GET | `/applications/job/:jobId` | Fetch applications for a specific job |
+| GET | `/applications/:applicationId` | Fetch detailed application information |
+| PATCH | `/applications/:applicationId/status` | Update candidate application status |
+
+---
+
+## Application Lifecycle
+
+The application workflow supports the following statuses:
+
+```text
+APPLIED
+   ↓
+SHORTLISTED
+   ↓
+INTERVIEW
+   ↓
+HIRED
+```
+
+Additional terminal statuses:
+
+- REJECTED
+- WITHDRAWN
+
+---
+
+## Notification APIs
+
+Implemented notification APIs for both platform roles.
+
+### Student Notification APIs
+
+- Fetch Notifications
+- Get Unread Count
+- Mark Notification as Read
+- Mark All Notifications as Read
+
+### Recruiter Notification APIs
+
+- Fetch Notifications
+- Get Unread Count
+- Mark Notification as Read
+- Mark All Notifications as Read
+
+---
+
+# Frontend Development
+
+## Pages Created
+
+### Recruiter Portal
+
+- Recruiter Applications
+- Recruiter Candidate Details
+- Recruiter Notifications
+
+### Student Portal
+
+- Student Notifications
+
+---
+
+# Components Built
+
+Developed reusable UI components including:
+
+- Application Card
+- Candidate Profile
+- Status Badge
+- Status Dropdown
+- Notification Card
+- Notification List
+- Unread Counter
+- Empty State
+- Loading Skeleton
+
+---
+
+# Recruiter Applications Module
+
+Recruiters can now:
+
+- View all received job applications
+- View applications for individual jobs
+- Open detailed candidate profiles
+- View complete application details
+- Review uploaded resumes
+- Access AI-powered resume analysis
+- Update hiring status
+- Track candidate progress throughout the hiring pipeline
+
+---
+
+# Candidate Details
+
+The candidate details page displays:
+
+- Student Profile
+- Resume
+- ATS Score
+- Professional Summary
+- Skills
+- Missing Skills
+- Strengths
+- Weaknesses
+- Improvement Suggestions
+- Academic Details
+
+---
+
+# Status Management
+
+Recruiters can update candidate application status directly from the interface.
+
+Supported workflow:
+
+```text
+Applied
+    ↓
+Shortlisted
+    ↓
+Interview
+    ↓
+Hired
+```
+
+Additional options:
+
+- Rejected
+- Withdrawn
+
+### Features
+
+- Instant UI updates after status change
+- Consistent status badges and colors
+- Smooth recruiter workflow
+
+---
+
+# Notification Module
+
+A complete notification system has been implemented for both Student and Recruiter portals.
+
+## Student Notifications
+
+Students receive notifications for events such as:
+
+- Application shortlisted
+- Interview scheduled
+- Offer received
+- Application rejected
+- Other recruiter updates
+
+### Features
+
+- Notification List
+- Unread Indicator
+- Mark as Read
+- Mark All as Read
+- Empty State
+- Responsive Layout
+
+---
+
+## Recruiter Notifications
+
+Recruiters receive notifications for:
+
+- New application received
+- Candidate activity
+- Hiring-related updates
+
+### Features
+
+- Notification List
+- Unread Indicator
+- Mark as Read
+- Mark All as Read
+- Empty State
+- Responsive Layout
+
+---
+
+## Future Enhancement
+
+The notification architecture is designed to support **Socket.IO** integration, enabling real-time notifications in future releases.
+
+---
+
+# UI Improvements
+
+Implemented several UI enhancements across both portals:
+
+- Shared notification component design
+- Consistent badges and status colors
+- Reusable cards
+- Professional recruiter workflow
+- Responsive layouts
+- Toast feedback
+- Loading states
+- Skeleton loaders
+
+---
+
+# Time Spent
+
+Approximately **2 days**
+
+- Recruiter Applications Module
+- Student Notifications
+- Recruiter Notifications
+
+---
+
+# Overall Project Progress
+
+## Student Portal ✅
+
+- Authentication
+- Dashboard
+- Resume Analysis
+- Jobs
+- Job Details
+- Applications
+- AI Interview
+- Interview Reports
+- Notifications
+
+---
+
+## Recruiter Portal ✅
+
+- Dashboard
+- Job Management
+- Applications Management
+- Candidate Review
+- Notifications
+
+---
+
+# Phase Summary
+
+Phase 6 - Day 10 successfully completed the Recruiter Applications Management module and introduced a complete Notification System for both Student and Recruiter portals. Recruiters can now efficiently review applications, manage candidate statuses throughout the hiring process, and access AI resume analysis, while both students and recruiters benefit from a centralized notification system with unread tracking and a scalable architecture ready for future real-time updates.

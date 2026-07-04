@@ -1,9 +1,58 @@
+import { useEffect, useState } from "react";
 import { Bell } from "lucide-react";
-import { useSelector } from "react-redux";
+import { getUnreadNotificationCount } from "../../services/notification.service";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
+import {
+  setUnreadCount,
+} from "../../features/notifications/notificationSlice";
 function Navbar() {
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
+  const navigate = useNavigate();
+
+  const unreadCount =
+    useSelector(
+
+      (state) =>
+        state.notifications.unreadCount
+
+    );
+
+  useEffect(() => {
+
+    fetchUnreadCount();
+
+  }, []);
+
+  const fetchUnreadCount =
+    async () => {
+
+      try {
+
+        const data =
+          await getUnreadNotificationCount();
+
+        dispatch(
+          setUnreadCount(
+            data.count
+          )
+        );
+
+      }
+
+      catch (error) {
+
+        console.error(
+          "Failed to fetch notification count",
+          error
+        );
+
+      }
+
+    };
   return (
     <header
       className="
@@ -26,6 +75,13 @@ function Navbar() {
       >
         <div className="flex items-center gap-4">
           <button
+            onClick={() =>
+              navigate(
+                user.role === "STUDENT"
+                  ? "/student/notifications"
+                  : "/recruiter/notifications"
+              )
+            }
             className="relative rounded-xl transition hover:bg-slate-100"
             style={{
               padding: "0.5rem", // p-2
@@ -33,8 +89,35 @@ function Navbar() {
           >
             <Bell size={20} className="text-slate-700" />
 
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-          </button>
+            {unreadCount > 0 && (
+
+              <span
+                style={{
+                  right: "-0.25rem",
+                  top: "-0.25rem",
+                  paddingLeft: "0.25rem",
+                  paddingRight: "0.25rem",
+                }}
+                className="
+            absolute
+            flex
+            h-5
+            min-w-[20px]
+            items-center
+            justify-center
+            rounded-full
+            bg-red-500
+            text-[10px]
+            font-bold
+            text-white
+        "
+              >
+                {unreadCount > 99
+                  ? "99+"
+                  : unreadCount}
+              </span>
+
+            )}          </button>
 
           <div className="h-8 w-px bg-slate-200" />
 

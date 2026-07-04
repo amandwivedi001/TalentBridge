@@ -87,11 +87,6 @@ export const sidebarConfig = {
             to: "/recruiter/jobs",
           },
           {
-            label: "Candidates",
-            icon: Users,
-            to: "/recruiter/candidates",
-          },
-          {
             label: "Applications",
             icon: ClipboardList,
             to: "/recruiter/applications",

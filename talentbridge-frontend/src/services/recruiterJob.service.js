@@ -36,3 +36,15 @@ export const updateJobStatus = async (
 
     return res.data.data;
 };
+
+export const getRankedCandidates =
+    async (jobId) => {
+
+        const res =
+            await api.get(
+                `/api/matches/job/${jobId}`
+            );
+
+        return res.data.data;
+
+    };
