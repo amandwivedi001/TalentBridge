@@ -59,11 +59,6 @@ export const sidebarConfig = {
             icon: Settings,
             to: "/student/settings",
           },
-          {
-            label: "Help Center",
-            icon: HelpCircle,
-            to: "/student/help",
-          },
         ],
       },
     ],
@@ -110,11 +105,6 @@ export const sidebarConfig = {
             label: "Settings",
             icon: Settings,
             to: "/recruiter/settings",
-          },
-          {
-            label: "Help Center",
-            icon: HelpCircle,
-            to: "/recruiter/help",
           },
         ],
       },

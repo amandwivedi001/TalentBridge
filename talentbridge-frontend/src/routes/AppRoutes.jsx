@@ -30,6 +30,9 @@ import RecruiterApplications from "../pages/recruiter/application/RecruiterAppli
 import RecruiterCandidateDetails from "../pages/recruiter/candidate/RecruiterCandidateDetails";
 import RecruiterNotifications from "../pages/recruiter/notification/RecruiterNotifications";
 import StudentNotifications from "../pages/student/notification/StudentNotifications";
+import RecruiterAnalytics from "../pages/recruiter/analystics/RecruiterAnalytics";
+import RecruiterSettings from "../pages/recruiter/setting/RecruiterSettings";
+import StudentSettings from "../pages/student/setting/StudentSettings";
 
 function AppRoutes() {
   return (
@@ -99,6 +102,11 @@ function AppRoutes() {
           element={<StudentNotifications />}
         />
 
+        <Route
+          path="settings"
+          element={<StudentSettings />}
+        />
+
       </Route>
       <Route
         path="/recruiter"
@@ -153,6 +161,15 @@ function AppRoutes() {
           element={<RecruiterNotifications />}
         />
 
+        <Route
+          path="analytics"
+          element={<RecruiterAnalytics />}
+        />
+
+        <Route
+          path="settings"
+          element={<RecruiterSettings />}
+        />
       </Route>
     </Routes>
   );
