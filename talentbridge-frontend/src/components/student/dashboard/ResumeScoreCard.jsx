@@ -92,7 +92,7 @@ function ResumeScoreCard({ score = 72 }) {
 
         {/* CENTER - BREAKDOWN */}
         <div className="border-b border-slate-100 p-8 lg:col-span-2 lg:border-b-0">
-          <div style={{marginBottom: "15px"}} className="mb-8 flex items-center justify-between">
+          <div style={{ marginBottom: "15px" }} className="mb-8 flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900">
               Score Breakdown
             </h3>
@@ -135,8 +135,8 @@ function ResumeScoreCard({ score = 72 }) {
         </div>
 
         {/* RIGHT - ATS INSIGHTS */}
-        <div style={{marginLeft: "20px"}} className="bg-slate-50/30 p-8 lg:border-l lg:border-slate-100">
-          <h3 style={{marginBottom: "15px"}} className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500">
+        <div style={{ marginLeft: "20px" }} className="bg-slate-50/30 p-8 lg:border-l lg:border-slate-100">
+          <h3 style={{ marginBottom: "15px" }} className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500">
             ATS Insights
           </h3>
 
@@ -152,7 +152,11 @@ function ResumeScoreCard({ score = 72 }) {
                   Resume Visibility
                 </p>
                 <p className="text-lg font-bold text-slate-900">
-                  Average
+                  {score >= 90
+                    ? "Best"
+                    : score >= 80
+                      ? "Good"
+                      : "Average"}
                 </p>
               </div>
             </div>
@@ -168,7 +172,7 @@ function ResumeScoreCard({ score = 72 }) {
                   Ranking
                 </p>
                 <p className="text-lg font-bold text-violet-600">
-                  Top 72%
+                  Top {score}%
                 </p>
               </div>
             </div>
