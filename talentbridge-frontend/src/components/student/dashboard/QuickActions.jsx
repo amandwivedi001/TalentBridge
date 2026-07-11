@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import Card from "../../common/Card";
 import {
   Upload,
@@ -6,24 +7,29 @@ import {
 } from "lucide-react";
 
 function QuickActions() {
+
+  const navigate = useNavigate();
   const actions = [
     {
       title: "Upload Resume",
       subtitle: "Improve ATS",
       icon: Upload,
       color: "bg-blue-50 text-blue-600",
+      to: "/student/resume"
     },
     {
       title: "Browse Jobs",
       subtitle: "Find Roles",
       icon: Briefcase,
       color: "bg-emerald-50 text-emerald-600",
+      to: "/student/jobs"
     },
     {
       title: "Mock Interview",
       subtitle: "Practice Skills",
       icon: Brain,
       color: "bg-violet-50 text-violet-600",
+      to: "/student/interviews"
     },
   ];
 
@@ -39,6 +45,7 @@ function QuickActions() {
 
           return (
             <button
+              onClick={() => navigate(to)}
               key={action.title}
               className="
                 group
