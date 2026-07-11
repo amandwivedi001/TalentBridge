@@ -45,7 +45,7 @@ function QuickActions() {
 
           return (
             <button
-              onClick={() => navigate(to)}
+              onClick={() => navigate(action.to)}
               key={action.title}
               className="
                 group
